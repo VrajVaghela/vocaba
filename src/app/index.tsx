@@ -1,98 +1,127 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from "@clerk/expo";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, ActivityIndicator } from "react-native";
+import { useRouter } from "expo-router";
+import { View, Text } from "@/tw";
+import { Image } from "@/tw/image";
+import { images } from "@/constants/images";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+const TOTAL_SLIDES = 4;
+const ACTIVE_SLIDE = 0;
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
+export default function OnboardingScreen() {
+  const { isSignedIn, isLoaded } = useAuth();
+  const router = useRouter();
+
+  // Wait for Clerk to determine auth state
+  if (!isLoaded) {
     return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#ffffff", justifyContent: "center", alignItems: "center" }}
+      >
+        <ActivityIndicator size="large" color="#7C3AED" />
+      </SafeAreaView>
     );
   }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
+  // If already signed in, show home (will be replaced by full tabs screen later)
+  if (isSignedIn) {
+    return (
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#ffffff", justifyContent: "center", alignItems: "center" }}
+      >
+        <Text style={{ fontSize: 24, fontFamily: "Poppins-SemiBold", color: "#1a1a2e" }}>
+          🎉 You&apos;re signed in!
+        </Text>
+        <Text style={{ fontSize: 14, fontFamily: "Poppins-Regular", color: "#666", marginTop: 8 }}>
+          Home screen coming soon…
+        </Text>
       </SafeAreaView>
-    </ThemedView>
+    );
+  }
+
+  // Onboarding screen for unauthenticated users
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffff" }}>
+      <View className="onboarding__content">
+        {/* ── Logo Row ────────────────────────────────────────── */}
+        <View className="onboarding__logo-row">
+          <Image source={images.mascotLogo} className="onboarding__logo-mark" />
+          <Text className="onboarding__logo-wordmark">lingua</Text>
+        </View>
+
+        {/* ── Hero Text ───────────────────────────────────────── */}
+        <View className="onboarding__hero">
+          <Text className="onboarding__title">
+            Your AI language{"\n"}
+            <Text className="onboarding__title--accent">teacher</Text>
+            <Text className="onboarding__title">.</Text>
+          </Text>
+          <Text className="onboarding__subtitle">
+            Real conversations, personalized{"\n"}lessons, anytime, anywhere.
+          </Text>
+        </View>
+
+        {/* ── Mascot Area ─────────────────────────────────────── */}
+        <View className="onboarding__mascot-area">
+          {/* Speech bubble – Hello! (top left) */}
+          <View className="speech-bubble speech-bubble--hello">
+            <Text className="speech-bubble__text speech-bubble__text--hello">
+              Hello!
+            </Text>
+          </View>
+
+          {/* Speech bubble – ¡Hola! (top right) */}
+          <View className="speech-bubble speech-bubble--hola">
+            <Text className="speech-bubble__text speech-bubble__text--hola">
+              ¡Hola!
+            </Text>
+          </View>
+
+          {/* Speech bubble – 你好！(bottom right) */}
+          <View className="speech-bubble speech-bubble--nihao">
+            <Text className="speech-bubble__text speech-bubble__text--nihao">
+              你好！
+            </Text>
+          </View>
+
+          {/* Mascot */}
+          <Image
+            source={images.mascotWelcome}
+            className="onboarding__mascot"
+            contentFit="contain"
+          />
+        </View>
+
+        {/* ── Pagination Dots ─────────────────────────────────── */}
+        <View className="onboarding__dots">
+          {Array.from({ length: TOTAL_SLIDES }).map((_, i) => (
+            <View
+              key={i}
+              className={
+                i === ACTIVE_SLIDE
+                  ? "onboarding__dot--active"
+                  : "onboarding__dot"
+              }
+            />
+          ))}
+        </View>
+
+        {/* ── CTA Button ──────────────────────────────────────── */}
+        <Pressable
+          onPress={() => router.push("/(auth)/sign-up")}
+          style={({ pressed }) => ({
+            opacity: pressed ? 0.85 : 1,
+          })}
+          accessibilityRole="button"
+          accessibilityLabel="Get Started"
+        >
+          <View className="onboarding__cta">
+            <Text className="onboarding__cta-text">Get Started</Text>
+            <Text className="onboarding__cta-arrow">›</Text>
+          </View>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-});
