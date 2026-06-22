@@ -1,56 +1,127 @@
-# Welcome to your Expo app 👋
+# Vocaba 🦜
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A **Duolingo-inspired AI language learning mobile app** built with Expo + React Native.
 
-## Get started
+Vocaba teaches users languages through interactive, AI-powered lessons — including video lessons with an AI teacher, audio lessons, chat-based AI tutoring, and vocabulary review.
 
-1. Install dependencies
+> This is a learning project designed to teach developers how to build a modern AI-powered Expo app **feature by feature**.
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
+## ✨ Features
 
-   ```bash
-   npx expo start
-   ```
+- 🎥 **Video AI Teacher** — AI-powered video lessons using Stream Vision Agents
+- 🎧 **Audio Lessons** — Immersive audio-based language practice
+- 💬 **AI Chat Tutor** — Real-time chat with an AI language tutor
+- 📖 **Vocabulary Review** — Spaced-repetition vocabulary cards
+- 🌍 **Language Selection** — Choose your target language
+- 🔥 **XP & Streaks** — Local gamification with XP and lesson completion tracking
+- 🔐 **Authentication** — Powered by Clerk
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🛠 Tech Stack
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+| Layer | Technology |
+|---|---|
+| Framework | [Expo](https://expo.dev) + React Native |
+| Language | TypeScript |
+| Routing | Expo Router |
+| Styling | NativeWind / Tailwind CSS |
+| State | Zustand + AsyncStorage |
+| Auth | Clerk |
+| Real-time / Video | Stream / GetStream |
+| AI Video Teacher | Stream Vision Agents |
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- [Expo CLI](https://docs.expo.dev/get-started/installation/)
+- Expo Go app on your device, or an Android/iOS simulator
+
+### Installation
 
 ```bash
-npm run reset-project
+# Clone the repo
+git clone https://github.com/VrajVaghela/vocaba.git
+cd vocaba
+
+# Install dependencies
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Environment Variables
 
-### Other setup steps
+Create a `.env.local` file at the project root:
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```env
+EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+STREAM_API_KEY=your_stream_api_key
+STREAM_API_SECRET=your_stream_api_secret
+```
 
-## Learn more
+> ⚠️ Never commit secret keys. Backend-only secrets stay server-side.
 
-To learn more about developing your project with Expo, look at the following resources:
+### Run the app
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npx expo start
+```
 
-## Join the community
+Then open in:
+- **Expo Go** — scan the QR code
+- **Android Emulator** — press `a`
+- **iOS Simulator** — press `i`
+- **Development Build** — see [Expo dev builds](https://docs.expo.dev/develop/development-builds/introduction/)
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 📁 Project Structure
+
+```
+vocaba/
+├── app/               # Expo Router screens & routes
+│   ├── (auth)/        # Auth screens (sign in, sign up)
+│   ├── (tabs)/        # Main tab navigation
+│   └── lesson/        # Lesson screens
+├── components/        # Reusable UI components
+├── constants/         # App constants & image imports
+├── data/              # Hardcoded lesson/language content
+├── hooks/             # Custom React hooks
+├── lib/               # External service helpers (Clerk, Stream, etc.)
+├── store/             # Zustand stores
+├── types/             # TypeScript types
+└── assets/            # Images, fonts, and other static assets
+```
+
+---
+
+## 🧪 Development
+
+```bash
+# Lint
+npm run lint
+
+# Type check
+npm run typecheck
+```
+
+---
+
+## 📚 Resources
+
+- [Expo Documentation](https://docs.expo.dev/)
+- [Expo Router](https://docs.expo.dev/router/introduction/)
+- [NativeWind Docs](https://www.nativewind.dev/)
+- [Clerk Docs](https://clerk.com/docs)
+- [Stream Docs](https://getstream.io/docs/)
+
+---
+
+## 📄 License
+
+MIT © [Vraj Vaghela](https://github.com/VrajVaghela)
