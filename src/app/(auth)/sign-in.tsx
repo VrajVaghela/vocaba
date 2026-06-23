@@ -12,12 +12,16 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useSignIn, useAuth } from "@clerk/expo";
+import { useSignIn, useAuth, useSSO } from "@clerk/expo";
+import * as WebBrowser from "expo-web-browser";
+import * as Linking from "expo-linking";
 import { View, Text } from "@/tw";
 import { Image } from "@/tw/image";
 import { images } from "@/constants/images";
 import { colors } from "@/theme";
 import { VerificationModal } from "@/components/VerificationModal";
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function SignInScreen() {
   const router = useRouter();
@@ -27,6 +31,35 @@ export default function SignInScreen() {
   const [email, setEmail] = useState("");
   const [showVerification, setShowVerification] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOAuthLoading, setIsOAuthLoading] = useState(false);
+  const { startSSOFlow } = useSSO();
+
+  React.useEffect(() => {
+    void WebBrowser.warmUpAsync();
+    return () => {
+      void WebBrowser.coolDownAsync();
+    };
+  }, []);
+
+  const handleOAuthSignIn = async (strategy: "oauth_google" | "oauth_facebook" | "oauth_apple") => {
+    if (!isLoaded) return;
+    setIsOAuthLoading(true);
+    try {
+      const { createdSessionId, setActive } = await startSSOFlow({
+        strategy,
+        redirectUrl: Linking.createURL("/sso-callback"),
+      });
+
+      if (createdSessionId && setActive) {
+        await setActive({ session: createdSessionId });
+      }
+    } catch (err: any) {
+      console.error("OAuth error", err);
+      Alert.alert("Authentication Error", err.message || "Something went wrong.");
+    } finally {
+      setIsOAuthLoading(false);
+    }
+  };
 
   const handleSignIn = async () => {
     if (!isLoaded || !email.trim()) return;
@@ -139,8 +172,10 @@ export default function SignInScreen() {
           {/* ── Social Buttons ──────────────────────────────── */}
           <View className="auth__social-list">
             <TouchableOpacity
-              style={styles.socialButton}
+              style={[styles.socialButton, { opacity: isOAuthLoading || isLoading ? 0.5 : 1 }]}
               activeOpacity={0.8}
+              onPress={() => handleOAuthSignIn("oauth_google")}
+              disabled={isOAuthLoading || isLoading}
               accessibilityLabel="Continue with Google"
             >
               <Text className="auth__social-icon">🇬</Text>
@@ -148,8 +183,10 @@ export default function SignInScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.socialButton}
+              style={[styles.socialButton, { opacity: isOAuthLoading || isLoading ? 0.5 : 1 }]}
               activeOpacity={0.8}
+              onPress={() => handleOAuthSignIn("oauth_facebook")}
+              disabled={isOAuthLoading || isLoading}
               accessibilityLabel="Continue with Facebook"
             >
               <Text className="auth__social-icon">🇫</Text>
@@ -157,8 +194,10 @@ export default function SignInScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.socialButton}
+              style={[styles.socialButton, { opacity: isOAuthLoading || isLoading ? 0.5 : 1 }]}
               activeOpacity={0.8}
+              onPress={() => handleOAuthSignIn("oauth_apple")}
+              disabled={isOAuthLoading || isLoading}
               accessibilityLabel="Continue with Apple"
             >
               <Text className="auth__social-icon">🍎</Text>

@@ -53,14 +53,21 @@ export function VerificationModal({
           throw error;
         }
 
-        const { error: finalizeError } = await signUp!.finalize();
-        if (finalizeError) {
-          throw finalizeError;
+        if (signUp!.status === "complete") {
+          const { error: finalizeError } = await signUp!.finalize({
+            navigate: () => {
+              onClose();
+              resetCode();
+              router.replace("/");
+            },
+          });
+          if (finalizeError) {
+            throw finalizeError;
+          }
+        } else {
+          onClose();
+          resetCode();
         }
-
-        onClose();
-        resetCode();
-        router.replace("/");
       } else {
         // ── Sign-in verification ──────────────────────────────
         const { error } = await signIn!.emailCode.verifyCode({
@@ -71,14 +78,21 @@ export function VerificationModal({
           throw error;
         }
 
-        const { error: finalizeError } = await signIn!.finalize();
-        if (finalizeError) {
-          throw finalizeError;
+        if (signIn!.status === "complete") {
+          const { error: finalizeError } = await signIn!.finalize({
+            navigate: () => {
+              onClose();
+              resetCode();
+              router.replace("/");
+            },
+          });
+          if (finalizeError) {
+            throw finalizeError;
+          }
+        } else {
+          onClose();
+          resetCode();
         }
-
-        onClose();
-        resetCode();
-        router.replace("/");
       }
     } catch (err: any) {
       const message =
