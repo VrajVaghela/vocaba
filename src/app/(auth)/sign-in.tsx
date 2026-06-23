@@ -66,7 +66,19 @@ export default function SignInScreen() {
 
     setIsLoading(true);
     try {
-      // Create sign-in with email code strategy (passwordless)
+      // Start the sign-in attempt with the email as the identifier (passwordless)
+      const { error: createError } = await signIn.create({
+        identifier: email.trim(),
+      });
+
+      if (createError) {
+        const message =
+          createError.longMessage || createError.message || "Sign in failed. Please try again.";
+        Alert.alert("Sign In Error", message);
+        return;
+      }
+
+      // Send the email verification code for the started attempt
       const { error } = await signIn.emailCode.sendCode({
         emailAddress: email.trim(),
       });

@@ -65,8 +65,11 @@ export function VerificationModal({
             throw finalizeError;
           }
         } else {
-          onClose();
-          resetCode();
+          // Code verified but the attempt still needs more steps
+          // (e.g. an extra factor configured in the Clerk dashboard).
+          throw new Error(
+            "Your email is verified, but a few more steps are needed to finish signing up. Please contact support.",
+          );
         }
       } else {
         // ── Sign-in verification ──────────────────────────────
@@ -90,8 +93,11 @@ export function VerificationModal({
             throw finalizeError;
           }
         } else {
-          onClose();
-          resetCode();
+          // Code verified but the attempt still needs more steps
+          // (e.g. a second factor configured in the Clerk dashboard).
+          throw new Error(
+            "Your email is verified, but a few more steps are needed to finish signing in. Please contact support.",
+          );
         }
       }
     } catch (err: any) {
