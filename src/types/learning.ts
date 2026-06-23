@@ -5,6 +5,7 @@ export interface Language {
   flag: string; // Emoji flag or icon identifier
   color: string; // Primary hex/theme color for the language UI
   welcomeMessage: string; // Brief welcome message in the language
+  learnersCount?: string; // Optional number/string of learners (e.g. "28.4M")
 }
 
 export interface Unit {

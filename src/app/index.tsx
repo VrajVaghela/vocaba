@@ -30,12 +30,27 @@ export default function OnboardingScreen() {
       <SafeAreaView
         style={{ flex: 1, backgroundColor: "#ffffff", justifyContent: "center", alignItems: "center" }}
       >
-        <Text style={{ fontSize: 24, fontFamily: "Poppins-SemiBold", color: "#1a1a2e" }}>
-          🎉 You&apos;re signed in!
-        </Text>
-        <Text style={{ fontSize: 14, fontFamily: "Poppins-Regular", color: "#666", marginTop: 8 }}>
-          Home screen coming soon…
-        </Text>
+        <View className="items-center px-6">
+          <Text className="text-h2 text-center text-lingua-purple mb-2">
+            🎉 You&apos;re signed in!
+          </Text>
+          <Text className="text-body-md text-center mb-6">
+            Welcome to Vocaba. Ready to start your learning journey?
+          </Text>
+          
+          <Pressable
+            onPress={() => router.push("/language-select")}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.85 : 1,
+            })}
+            accessibilityRole="button"
+            accessibilityLabel="Choose Language"
+          >
+            <View className="button-primary px-8">
+              <Text className="button-primary__text">Choose a Language</Text>
+            </View>
+          </Pressable>
+        </View>
       </SafeAreaView>
     );
   }
