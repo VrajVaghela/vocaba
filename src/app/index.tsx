@@ -1,8 +1,7 @@
 import { useAuth } from "@clerk/expo";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Pressable, ActivityIndicator } from "react-native";
-import { Redirect, useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Redirect, useRouter, Href } from "expo-router";
 import { View, Text } from "@/tw";
 import { Image } from "@/tw/image";
 import { images } from "@/constants/images";
@@ -16,12 +15,6 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const selectedLanguageId = useLanguageStore((s) => s.selectedLanguageId);
   const hasHydrated = useLanguageStore((s) => s.hasHydrated);
-
-  // Clear persisted storage so the language-selection flow can be re-tested.
-  const handleClearStorage = async () => {
-    await AsyncStorage.clear();
-    useLanguageStore.getState().setSelectedLanguageId(null);
-  };
 
   // Wait for Clerk auth state AND the persisted language state to load
   // before deciding where to route the user.
@@ -40,50 +33,9 @@ export default function OnboardingScreen() {
     return <Redirect href="/language-select" />;
   }
 
-  // If already signed in, show home (will be replaced by full tabs screen later)
+  // If already signed in, redirect to home tab screen
   if (isSignedIn) {
-    return (
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#ffffff", justifyContent: "center", alignItems: "center" }}
-      >
-        <View className="items-center px-6">
-          <Text className="text-h2 text-center text-lingua-purple mb-2">
-            🎉 You&apos;re signed in!
-          </Text>
-          <Text className="text-body-md text-center mb-6">
-            Welcome to Vocaba. Ready to start your learning journey?
-          </Text>
-          
-          <Pressable
-            onPress={() => router.push("/language-select")}
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.85 : 1,
-            })}
-            accessibilityRole="button"
-            accessibilityLabel="Choose Language"
-          >
-            <View className="button-primary px-8">
-              <Text className="button-primary__text">Choose a Language</Text>
-            </View>
-          </Pressable>
-
-          {/* Dev helper: clear persisted storage to re-test language selection */}
-          <Pressable
-            onPress={handleClearStorage}
-            style={({ pressed }) => ({
-              opacity: pressed ? 0.6 : 1,
-              marginTop: 16,
-            })}
-            accessibilityRole="button"
-            accessibilityLabel="Clear storage"
-          >
-            <Text className="text-body-sm text-center text-text-secondary underline">
-              Clear storage (testing)
-            </Text>
-          </Pressable>
-        </View>
-      </SafeAreaView>
-    );
+    return <Redirect href={"/home" as Href} />;
   }
 
   // Onboarding screen for unauthenticated users
