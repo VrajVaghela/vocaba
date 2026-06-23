@@ -4,6 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { ClerkProvider, ClerkLoaded } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
+import { PostHogProvider } from "posthog-react-native";
 
 import { colors } from "@/theme";
 
@@ -34,20 +35,25 @@ export default function RootLayout() {
   }
 
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <ClerkLoaded>
-        <Stack
-          screenOptions={{
-            contentStyle: { backgroundColor: colors.background },
-            headerShown: false,
-            headerShadowVisible: false,
-            headerTitleStyle: {
-              color: colors.textPrimary,
-              fontFamily: "Poppins-SemiBold",
-            },
-          }}
-        />
-      </ClerkLoaded>
-    </ClerkProvider>
+    <PostHogProvider
+      apiKey={process.env.EXPO_PUBLIC_POSTHOG_KEY!}
+      options={{ host: process.env.EXPO_PUBLIC_POSTHOG_HOST }}
+    >
+      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+        <ClerkLoaded>
+          <Stack
+            screenOptions={{
+              contentStyle: { backgroundColor: colors.background },
+              headerShown: false,
+              headerShadowVisible: false,
+              headerTitleStyle: {
+                color: colors.textPrimary,
+                fontFamily: "Poppins-SemiBold",
+              },
+            }}
+          />
+        </ClerkLoaded>
+      </ClerkProvider>
+    </PostHogProvider>
   );
 }

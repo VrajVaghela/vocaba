@@ -11,6 +11,14 @@ import { lessons } from "@/data/lessons";
 import { units } from "@/data/units";
 import { languages } from "@/data/languages";
 import { images } from "@/constants/images";
+import { useUser } from "@clerk/expo";
+import {
+  StreamVideoClient,
+  StreamVideo,
+  StreamCall,
+  useCallStateHooks,
+  Call,
+} from "@stream-io/video-react-native-sdk";
 
 // Icons mapping for SymbolView
 const backIcon = {
@@ -80,164 +88,77 @@ const endCallIcon = {
   web: "call_end" as AndroidSymbol,
 };
 
-export default function LessonScreen() {
-  const router = useRouter();
-  const params = useLocalSearchParams<{ id: string }>();
-  const { id: lessonId } = params;
-  const { completeLesson, streak } = useProgressStore();
+interface ActiveCallInterfaceProps {
+  lesson: typeof lessons[0];
+  language: typeof languages[0];
+  streak: number;
+  activeStep: any;
+  isRecording: boolean;
+  setIsRecording: (val: boolean) => void;
+  isEvaluating: boolean;
+  setIsEvaluating: (val: boolean) => void;
+  steps: any[];
+  currentStep: number;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
+  handleEndCall: () => void;
+  cameraEnabled: boolean;
+  setCameraEnabled: (val: boolean) => void;
+  subtitlesEnabled: boolean;
+  setSubtitlesEnabled: (val: boolean) => void;
+  pulseAnim: Animated.Value;
+  rawTeacherName: string;
+  isStream: boolean;
+  localMicEnabled: boolean;
+  setLocalMicEnabled: (val: boolean) => void;
+  callId: string;
+  user: any;
+}
 
-  // Find the lesson in lessons data
-  const lesson = lessons.find((l) => l.id === lessonId) || lessons[0];
+// Presentational Layout Component
+function CallInterfaceLayout({
+  lesson,
+  language,
+  streak,
+  activeStep,
+  isRecording,
+  setIsRecording,
+  isEvaluating,
+  setIsEvaluating,
+  steps,
+  currentStep,
+  setCurrentStep,
+  handleEndCall,
+  cameraEnabled,
+  setCameraEnabled,
+  subtitlesEnabled,
+  setSubtitlesEnabled,
+  pulseAnim,
+  isStream,
+  callId,
+  user,
+  isMuted,
+  toggleMic,
+  participantCount,
+}: ActiveCallInterfaceProps & {
+  isMuted: boolean;
+  toggleMic: () => Promise<void>;
+  participantCount: number;
+}) {
+  // Handle Speech/Recording practice simulation when unmuted
+  const triggerRecordingFlow = () => {
+    if (isMuted || isRecording || isEvaluating || currentStep >= steps.length - 1) return;
 
-  // Resolve language info
-  const unit = units.find((u) => u.id === lesson.unitId);
-  const language = languages.find((lang) => lang.id === (unit ? unit.languageId : "es")) || languages[0];
-
-  // Screen/UI States
-  const [status, setStatus] = useState<"connecting" | "connected" | "ended">("connecting");
-  const [cameraEnabled, setCameraEnabled] = useState(true);
-  const [micEnabled, setMicEnabled] = useState(true);
-  const [subtitlesEnabled, setSubtitlesEnabled] = useState(true);
-  const [isRecording, setIsRecording] = useState(false);
-  const [isEvaluating, setIsEvaluating] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
-
-  // Modals / Confirmations
-  const [showExitConfirm, setShowExitConfirm] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-
-  // Safe helper to extract content properties from the union type
-  const firstActivityContent = lesson.activities?.[0]?.content;
-  const rawTranscript = firstActivityContent && "transcript" in firstActivityContent ? firstActivityContent.transcript : null;
-  const rawTeacherName = firstActivityContent && "teacherName" in firstActivityContent ? firstActivityContent.teacherName : "Sofia";
-
-  // Conversation Simulation Steps based on active lesson data
-  const step1Text = rawTranscript || `¡Hola! Welcome to your lesson. I am your AI teacher. Let's practice some key phrases.`;
-  const step2Text = lesson.phrasesList?.[0]?.phrase || lesson.vocabularyList?.[0]?.word || "Hola";
-  const step2Trans = lesson.phrasesList?.[0]?.translation || lesson.vocabularyList?.[0]?.translation || "Hello";
-  const step3Text = lesson.phrasesList?.[1]?.phrase || lesson.vocabularyList?.[1]?.word || "¿Cómo estás?";
-  const step3Trans = lesson.phrasesList?.[1]?.translation || lesson.vocabularyList?.[1]?.translation || "How are you?";
-
-  const steps = [
-    {
-      teacherSpeech: step1Text,
-      englishTranslation: "Welcome to the lesson! Today we are learning key phrases.",
-      actionPrompt: "Tap the mic and say hello to begin!",
-      speaking: "Good",
-      pronunciation: "Good",
-      grammar: "Good",
-    },
-    {
-      teacherSpeech: `Excellent. Let's practice the first phrase. Repeat after me: "${step2Text}"`,
-      englishTranslation: `"${step2Trans}"`,
-      actionPrompt: `Tap the mic and repeat: "${step2Text}"`,
-      speaking: "Great",
-      pronunciation: "Great",
-      grammar: "Good",
-    },
-    {
-      teacherSpeech: `Amazing! Now try repeating this next phrase: "${step3Text}"`,
-      englishTranslation: `"${step3Trans}"`,
-      actionPrompt: `Tap the mic and repeat: "${step3Text}"`,
-      speaking: "Excellent",
-      pronunciation: "Great",
-      grammar: "Good", // Matches the mock design (Excellent, Great, Good)
-    },
-    {
-      teacherSpeech: "¡Muy bien! That was great! You did an amazing job today. 👏",
-      englishTranslation: "Very well! That was great! You did an amazing job today.",
-      actionPrompt: "Lesson finished! Tap End Call to finish and claim your XP.",
-      speaking: "Excellent",
-      pronunciation: "Great",
-      grammar: "Good",
-    },
-  ];
-
-  // Active step details
-  const activeStep = steps[currentStep] || steps[0];
-
-  // Pulse animation for mic button during recording
-  const [pulseAnim] = useState(() => new Animated.Value(1));
-
-  // Simulate Connection on Load
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setStatus("connected");
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Handle pulse animation loop
-  useEffect(() => {
-    let animation: Animated.CompositeAnimation | null = null;
-    if (isRecording) {
-      animation = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1.25,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1.0,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      animation.start();
-    } else {
-      pulseAnim.setValue(1);
-    }
-    return () => {
-      if (animation) animation.stop();
-    };
-  }, [isRecording, pulseAnim]);
-
-  // Mic Button Press: Simulates recording user speech
-  const handleMicPress = () => {
-    if (!micEnabled) {
-      setMicEnabled(true);
-      return;
-    }
-    if (isRecording || isEvaluating || currentStep >= steps.length - 1) return;
-
-    // Start recording state
     setIsRecording(true);
 
-    // Simulate 2.5 seconds of recording
     setTimeout(() => {
       setIsRecording(false);
       setIsEvaluating(true);
 
-      // Simulate 1.5 seconds of evaluation/AI teacher processing
       setTimeout(() => {
         setIsEvaluating(false);
         setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
       }, 1500);
     }, 2500);
-  };
-
-  // End Call / Finish
-  const handleEndCall = () => {
-    if (currentStep >= steps.length - 1) {
-      // Completed! Award XP and show Success modal
-      completeLesson(lesson.id, lesson.xpReward);
-      setShowSuccessModal(true);
-    } else {
-      // Show confirmation dialog before leaving early
-      setShowExitConfirm(true);
-    }
-  };
-
-  const confirmExit = () => {
-    setShowExitConfirm(false);
-    router.replace("/learn");
-  };
-
-  const handleFinishAndReturn = () => {
-    setShowSuccessModal(false);
-    router.replace("/learn");
   };
 
   // Get color for feedback value text
@@ -246,28 +167,6 @@ export default function LessonScreen() {
     if (val === "Great") return "#4D8BFF"; // Blue
     return "#6C4EF5"; // Purple
   };
-
-  if (status === "connecting") {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <View className="flex-1 items-center justify-center bg-white px-6">
-          <ActivityIndicator size="large" color={colors.linguaPurple} />
-          <Text
-            className="text-lg text-text-primary mt-6 text-center font-bold"
-            style={{ fontFamily: "Poppins-Bold" }}
-          >
-            Connecting to AI Teacher...
-          </Text>
-          <Text
-            className="text-sm text-text-secondary mt-2 text-center"
-            style={{ fontFamily: "Poppins-Regular" }}
-          >
-            Setting up secure audio session for {lesson.title}
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -293,7 +192,7 @@ export default function LessonScreen() {
               className="text-xs text-text-secondary font-medium"
               style={{ fontFamily: "Poppins-Medium" }}
             >
-              Online
+              {isStream ? `Stream Room (${participantCount} active)` : "Demo Room"}
             </Text>
           </View>
         </View>
@@ -324,9 +223,13 @@ export default function LessonScreen() {
             </Text>
           </View>
 
-          {/* Profile silhouette */}
-          <View className="w-9 h-9 items-center justify-center rounded-full border border-gray-100 bg-white">
-            <SymbolView name={profileBadgeIcon} tintColor={colors.textPrimary} size={15} />
+          {/* Profile silhouette / avatar */}
+          <View className="w-9 h-9 items-center justify-center rounded-full border border-gray-100 bg-white overflow-hidden">
+            {user?.imageUrl ? (
+              <Image source={{ uri: user.imageUrl }} className="w-full h-full" contentFit="cover" />
+            ) : (
+              <SymbolView name={profileBadgeIcon} tintColor={colors.textPrimary} size={15} />
+            )}
           </View>
         </View>
       </View>
@@ -344,12 +247,30 @@ export default function LessonScreen() {
         {/* Semi-transparent dark overlay for premium aesthetics */}
         <View className="absolute inset-0 bg-black/5" />
 
+        {/* Floating Participant details */}
+        <View className="absolute top-4 left-4 bg-white/80 border border-gray-100 rounded-full px-3 py-1 flex-row items-center gap-1.5 shadow-sm z-10">
+          <View className={`w-2 h-2 rounded-full ${isMuted ? "bg-red-500" : "bg-[#21C16B]"}`} />
+          <Text className="text-[10px] font-bold text-text-primary uppercase" style={{ fontFamily: "Poppins-Bold" }}>
+            {isStream ? `Call: ${callId.slice(-8)}` : "Demo Mode"}
+          </Text>
+        </View>
+
         {/* Floating Student PIP (Picture-In-Picture) in top right */}
-        {cameraEnabled && (
-          <View className="absolute top-4 right-4 w-24 h-32 rounded-2xl border-2 border-white shadow-md overflow-hidden z-10">
-            <Image source={images.studentAvatar} className="w-full h-full" contentFit="cover" />
-          </View>
-        )}
+        <View className="absolute top-4 right-4 w-24 h-32 rounded-2xl border-2 border-white shadow-md overflow-hidden bg-slate-100 flex-col items-center justify-center z-10">
+          {cameraEnabled ? (
+            <Image source={user?.imageUrl ? { uri: user.imageUrl } : images.studentAvatar} className="w-full h-full" contentFit="cover" />
+          ) : (
+            <View className="items-center justify-center p-2">
+              <SymbolView name={profileBadgeIcon} tintColor={colors.textSecondary} size={24} />
+              <Text className="text-[9px] text-center text-text-secondary mt-1 font-bold truncate max-w-full" style={{ fontFamily: "Poppins-Bold" }}>
+                {user?.firstName || "You"}
+              </Text>
+              <Text className="text-[8px] text-center text-text-secondary font-semibold mt-0.5" style={{ fontFamily: "Poppins-SemiBold", color: isMuted ? "#FF3B30" : "#21C16B" }}>
+                {isMuted ? "Muted" : "Active"}
+              </Text>
+            </View>
+          )}
+        </View>
 
         {/* AI Mascot character positioned centered at the bottom of the card */}
         <View className="flex-1 items-center justify-end pb-12 z-0">
@@ -394,7 +315,9 @@ export default function LessonScreen() {
       <View className="items-center justify-center px-6 h-8">
         <Text
           className={`text-sm font-semibold text-center ${
-            isRecording
+            isMuted
+              ? "text-red-500"
+              : isRecording
               ? "text-success"
               : isEvaluating
               ? "text-info"
@@ -402,7 +325,9 @@ export default function LessonScreen() {
           }`}
           style={{ fontFamily: "Poppins-Medium" }}
         >
-          {isRecording
+          {isMuted
+            ? "🎙 Microphone is muted. Tap Mic to unmute!"
+            : isRecording
             ? "🎙 Listening... Speak now!"
             : isEvaluating
             ? "⚙ Evaluation in progress..."
@@ -438,22 +363,22 @@ export default function LessonScreen() {
         <View className="items-center">
           <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
             <Pressable
-              onPress={handleMicPress}
+              onPress={isMuted ? toggleMic : triggerRecordingFlow}
               disabled={isEvaluating || currentStep >= steps.length - 1}
               className={`w-14 h-14 rounded-full items-center justify-center border shadow-sm ${
                 isRecording
                   ? "bg-[#21C16B] border-transparent"
-                  : !micEnabled
+                  : isMuted
                   ? "bg-slate-100 border-gray-200"
                   : "bg-white border-gray-150"
               }`}
             >
               <SymbolView
-                name={!micEnabled ? micSlashIcon : micIcon}
+                name={isMuted ? micSlashIcon : micIcon}
                 tintColor={
                   isRecording
                     ? "#FFFFFF"
-                    : !micEnabled
+                    : isMuted
                     ? colors.textSecondary
                     : colors.textPrimary
                 }
@@ -461,12 +386,21 @@ export default function LessonScreen() {
               />
             </Pressable>
           </Animated.View>
-          <Text
-            className="text-[11px] text-text-secondary mt-2 font-medium"
-            style={{ fontFamily: "Poppins-Medium" }}
-          >
-            {isRecording ? "Listening" : "Mic"}
-          </Text>
+          <View className="flex-row items-center gap-1.5 mt-2">
+            <Text
+              className="text-[11px] text-text-secondary font-medium"
+              style={{ fontFamily: "Poppins-Medium" }}
+            >
+              {isRecording ? "Listening" : isMuted ? "Muted" : "Mic"}
+            </Text>
+            {!isRecording && (
+              <Pressable onPress={toggleMic} className="w-4 h-4 bg-slate-100 border border-gray-200 items-center justify-center rounded-full">
+                <Text className="text-[8px] font-bold text-text-secondary">
+                  {isMuted ? "🎙" : "🔇"}
+                </Text>
+              </Pressable>
+            )}
+          </View>
         </View>
 
         {/* Toggle Subtitles */}
@@ -575,6 +509,401 @@ export default function LessonScreen() {
           </View>
         </View>
       </View>
+    </SafeAreaView>
+  );
+}
+
+// Inner Stream calling component (called only when isStream is true)
+function StreamActiveCallInterface(props: ActiveCallInterfaceProps) {
+  const { useMicrophoneState, useCallSession } = useCallStateHooks();
+  const { microphone, isMute } = useMicrophoneState();
+  const session = useCallSession();
+
+  const toggleMic = async () => {
+    try {
+      await microphone.toggle();
+    } catch (err) {
+      console.error("Failed to toggle stream microphone:", err);
+    }
+  };
+
+  return (
+    <CallInterfaceLayout
+      {...props}
+      isMuted={isMute}
+      toggleMic={toggleMic}
+      participantCount={session?.participants?.length || 1}
+    />
+  );
+}
+
+// Inner local fallback/demo component
+function DemoActiveCallInterface(props: ActiveCallInterfaceProps) {
+  const toggleMic = async () => {
+    props.setLocalMicEnabled(!props.localMicEnabled);
+  };
+
+  return (
+    <CallInterfaceLayout
+      {...props}
+      isMuted={!props.localMicEnabled}
+      toggleMic={toggleMic}
+      participantCount={1}
+    />
+  );
+}
+
+export default function LessonScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams<{ id: string }>();
+  const { id: lessonId } = params;
+  const { completeLesson, streak } = useProgressStore();
+  const { user } = useUser();
+
+  // Find the lesson in lessons data
+  const lesson = lessons.find((l) => l.id === lessonId) || lessons[0];
+
+  // Resolve language info
+  const unit = units.find((u) => u.id === lesson.unitId);
+  const language = languages.find((lang) => lang.id === (unit ? unit.languageId : "es")) || languages[0];
+
+  // GetStream SDK connection states
+  const [streamClient, setStreamClient] = useState<StreamVideoClient | null>(null);
+  const [streamCall, setStreamCall] = useState<Call | null>(null);
+  const [streamStatus, setStreamStatus] = useState<"connecting" | "joined" | "error" | "ended">("connecting");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [demoMode, setDemoMode] = useState(false);
+  const [localMicEnabled, setLocalMicEnabled] = useState(true);
+
+  // Screen/UI States
+  const [cameraEnabled, setCameraEnabled] = useState(true);
+  const [subtitlesEnabled, setSubtitlesEnabled] = useState(true);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  // Modals / Confirmations
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // Safe helper to extract content properties from the union type
+  const firstActivityContent = lesson.activities?.[0]?.content;
+  const rawTranscript = firstActivityContent && "transcript" in firstActivityContent ? firstActivityContent.transcript : null;
+  const rawTeacherName = firstActivityContent && "teacherName" in firstActivityContent ? firstActivityContent.teacherName : "Sofia";
+
+  // Conversation Simulation Steps based on active lesson data
+  const step1Text = rawTranscript || `¡Hola! Welcome to your lesson. I am your AI teacher. Let's practice some key phrases.`;
+  const step2Text = lesson.phrasesList?.[0]?.phrase || lesson.vocabularyList?.[0]?.word || "Hola";
+  const step2Trans = lesson.phrasesList?.[0]?.translation || lesson.vocabularyList?.[0]?.translation || "Hello";
+  const step3Text = lesson.phrasesList?.[1]?.phrase || lesson.vocabularyList?.[1]?.word || "¿Cómo estás?";
+  const step3Trans = lesson.phrasesList?.[1]?.translation || lesson.vocabularyList?.[1]?.translation || "How are you?";
+
+  const steps = [
+    {
+      teacherSpeech: step1Text,
+      englishTranslation: "Welcome to the lesson! Today we are learning key phrases.",
+      actionPrompt: "Tap the mic and say hello to begin!",
+      speaking: "Good",
+      pronunciation: "Good",
+      grammar: "Good",
+    },
+    {
+      teacherSpeech: `Excellent. Let's practice the first phrase. Repeat after me: "${step2Text}"`,
+      englishTranslation: `"${step2Trans}"`,
+      actionPrompt: `Tap the mic and repeat: "${step2Text}"`,
+      speaking: "Great",
+      pronunciation: "Great",
+      grammar: "Good",
+    },
+    {
+      teacherSpeech: `Amazing! Now try repeating this next phrase: "${step3Text}"`,
+      englishTranslation: `"${step3Trans}"`,
+      actionPrompt: `Tap the mic and repeat: "${step3Text}"`,
+      speaking: "Excellent",
+      pronunciation: "Great",
+      grammar: "Good",
+    },
+    {
+      teacherSpeech: "¡Muy bien! That was great! You did an amazing job today. 👏",
+      englishTranslation: "Very well! That was great! You did an amazing job today.",
+      actionPrompt: "Lesson finished! Tap End Call to finish and claim your XP.",
+      speaking: "Excellent",
+      pronunciation: "Great",
+      grammar: "Good",
+    },
+  ];
+
+  // Active step details
+  const activeStep = steps[currentStep] || steps[0];
+
+  // Pulse animation for mic button during recording
+  const [pulseAnim] = useState(() => new Animated.Value(1));
+
+  // Initialize GetStream Room Call via Expo API Route
+  useEffect(() => {
+    let activeClient: StreamVideoClient | null = null;
+    let activeCall: Call | null = null;
+    let isMounted = true;
+
+    async function initStream() {
+      try {
+        if (!user) return;
+
+        // 1. Fetch token and call config from backend
+        const response = await fetch("/api/stream", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: user.id,
+            userName: user.fullName || user.firstName || "Learner",
+            userImage: user.imageUrl || "",
+            lessonId: lesson.id,
+            languageId: language.id,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server returned HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        if (!isMounted) return;
+
+        // 2. Setup Client
+        const client = new StreamVideoClient({
+          apiKey: data.apiKey,
+          user: {
+            id: user.id,
+            name: user.fullName || user.firstName || "Learner",
+            image: user.imageUrl || undefined,
+          },
+          token: data.token,
+        });
+
+        activeClient = client;
+        setStreamClient(client);
+
+        // 3. Create & Join Call
+        const call = client.call(data.callType, data.callId);
+        await call.join({ create: true });
+
+        if (!isMounted) return;
+        activeCall = call;
+        setStreamCall(call);
+        setStreamStatus("joined");
+      } catch (err: any) {
+        console.error("Stream Video/Audio error:", err);
+        if (isMounted) {
+          setErrorMessage(err.message || "Could not connect to Stream call room");
+          setStreamStatus("error");
+        }
+      }
+    }
+
+    if (user && !demoMode) {
+      initStream();
+    }
+
+    return () => {
+      isMounted = false;
+      if (activeCall) {
+        activeCall.leave().catch((err) => console.log("Clean up leaving call:", err));
+      }
+      if (activeClient) {
+        activeClient.disconnectUser().catch((err) => console.log("Clean up disconnecting client:", err));
+      }
+    };
+  }, [user, demoMode, lesson.id, language.id]);
+
+  // Handle pulse animation loop
+  useEffect(() => {
+    let animation: Animated.CompositeAnimation | null = null;
+    if (isRecording) {
+      animation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.25,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1.0,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      animation.start();
+    } else {
+      pulseAnim.setValue(1);
+    }
+    return () => {
+      if (animation) animation.stop();
+    };
+  }, [isRecording, pulseAnim]);
+
+  // End Call / Finish
+  const handleEndCall = () => {
+    if (currentStep >= steps.length - 1) {
+      completeLesson(lesson.id, lesson.xpReward);
+      setShowSuccessModal(true);
+    } else {
+      setShowExitConfirm(true);
+    }
+  };
+
+  const confirmExit = () => {
+    setShowExitConfirm(false);
+    setStreamStatus("ended");
+    router.replace("/learn");
+  };
+
+  const handleFinishAndReturn = () => {
+    setShowSuccessModal(false);
+    setStreamStatus("ended");
+    router.replace("/learn");
+  };
+
+  // Connecting view
+  if (streamStatus === "connecting" && !demoMode) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View className="flex-1 items-center justify-center bg-white px-6">
+          <ActivityIndicator size="large" color={colors.linguaPurple} />
+          <Text
+            className="text-lg text-text-primary mt-6 text-center font-bold"
+            style={{ fontFamily: "Poppins-Bold" }}
+          >
+            Connecting to AI Teacher...
+          </Text>
+          <Text
+            className="text-sm text-text-secondary mt-2 text-center"
+            style={{ fontFamily: "Poppins-Regular" }}
+          >
+            Joining call room for {lesson.title}
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Error fallback view
+  if (streamStatus === "error" && !demoMode) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View className="flex-1 items-center justify-center bg-white px-6">
+          <SymbolView
+            name={{ ios: "exclamationmark.triangle.fill", android: "warning", web: "warning" }}
+            tintColor="#FF3B30"
+            size={48}
+          />
+          <Text
+            className="text-xl text-text-primary mt-6 text-center font-bold"
+            style={{ fontFamily: "Poppins-Bold" }}
+          >
+            Connection Error
+          </Text>
+          <Text
+            className="text-sm text-text-secondary mt-2 text-center max-w-xs leading-relaxed"
+            style={{ fontFamily: "Poppins-Regular" }}
+          >
+            {errorMessage || "We couldn't connect to the Stream Call. This happens if your API credentials are not set up."}
+          </Text>
+          
+          <View className="w-full gap-3 mt-8">
+            <Pressable
+              onPress={() => {
+                setStreamStatus("connecting");
+                setDemoMode(false);
+              }}
+              className="w-full py-4 bg-linguaPurple rounded-2xl items-center justify-center shadow-md active:bg-linguaDeepPurple"
+            >
+              <Text className="text-white text-base font-bold" style={{ fontFamily: "Poppins-Bold" }}>
+                Retry Connection
+              </Text>
+            </Pressable>
+            
+            <Pressable
+              onPress={() => setDemoMode(true)}
+              className="w-full py-4 bg-slate-100 rounded-2xl items-center justify-center active:bg-slate-200"
+            >
+              <Text className="text-text-primary text-base font-bold" style={{ fontFamily: "Poppins-Bold" }}>
+                Start Offline Demo Mode
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Call Content container
+  const callId = streamCall?.id || "demo-room";
+  const isStreamActive = !demoMode && !!streamClient && !!streamCall;
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      {isStreamActive ? (
+        <StreamVideo client={streamClient!}>
+          <StreamCall call={streamCall!}>
+            <StreamActiveCallInterface
+              lesson={lesson}
+              language={language}
+              streak={streak}
+              activeStep={activeStep}
+              isRecording={isRecording}
+              setIsRecording={setIsRecording}
+              isEvaluating={isEvaluating}
+              setIsEvaluating={setIsEvaluating}
+              steps={steps}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              handleEndCall={handleEndCall}
+              cameraEnabled={cameraEnabled}
+              setCameraEnabled={setCameraEnabled}
+              subtitlesEnabled={subtitlesEnabled}
+              setSubtitlesEnabled={setSubtitlesEnabled}
+              pulseAnim={pulseAnim}
+              rawTeacherName={rawTeacherName}
+              isStream={true}
+              localMicEnabled={localMicEnabled}
+              setLocalMicEnabled={setLocalMicEnabled}
+              callId={callId}
+              user={user}
+            />
+          </StreamCall>
+        </StreamVideo>
+      ) : (
+        <DemoActiveCallInterface
+          lesson={lesson}
+          language={language}
+          streak={streak}
+          activeStep={activeStep}
+          isRecording={isRecording}
+          setIsRecording={setIsRecording}
+          isEvaluating={isEvaluating}
+          setIsEvaluating={setIsEvaluating}
+          steps={steps}
+          currentStep={currentStep}
+          setCurrentStep={setCurrentStep}
+          handleEndCall={handleEndCall}
+          cameraEnabled={cameraEnabled}
+          setCameraEnabled={setCameraEnabled}
+          subtitlesEnabled={subtitlesEnabled}
+          setSubtitlesEnabled={setSubtitlesEnabled}
+          pulseAnim={pulseAnim}
+          rawTeacherName={rawTeacherName}
+          isStream={false}
+          localMicEnabled={localMicEnabled}
+          setLocalMicEnabled={setLocalMicEnabled}
+          callId={callId}
+          user={user}
+        />
+      )}
 
       {/* ── Confirm Early Exit Modal ────────────────────── */}
       <Modal
