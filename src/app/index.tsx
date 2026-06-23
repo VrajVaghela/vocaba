@@ -1,10 +1,12 @@
 import { useAuth } from "@clerk/expo";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Pressable, ActivityIndicator } from "react-native";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { View, Text } from "@/tw";
 import { Image } from "@/tw/image";
 import { images } from "@/constants/images";
+import { useLanguageStore } from "@/store/languageStore";
 
 const TOTAL_SLIDES = 4;
 const ACTIVE_SLIDE = 0;
@@ -12,9 +14,18 @@ const ACTIVE_SLIDE = 0;
 export default function OnboardingScreen() {
   const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
+  const selectedLanguageId = useLanguageStore((s) => s.selectedLanguageId);
+  const hasHydrated = useLanguageStore((s) => s.hasHydrated);
 
-  // Wait for Clerk to determine auth state
-  if (!isLoaded) {
+  // Clear persisted storage so the language-selection flow can be re-tested.
+  const handleClearStorage = async () => {
+    await AsyncStorage.clear();
+    useLanguageStore.getState().setSelectedLanguageId(null);
+  };
+
+  // Wait for Clerk auth state AND the persisted language state to load
+  // before deciding where to route the user.
+  if (!isLoaded || !hasHydrated) {
     return (
       <SafeAreaView
         style={{ flex: 1, backgroundColor: "#ffffff", justifyContent: "center", alignItems: "center" }}
@@ -22,6 +33,11 @@ export default function OnboardingScreen() {
         <ActivityIndicator size="large" color="#7C3AED" />
       </SafeAreaView>
     );
+  }
+
+  // Authenticated users without a selected language must choose one first.
+  if (isSignedIn && !selectedLanguageId) {
+    return <Redirect href="/language-select" />;
   }
 
   // If already signed in, show home (will be replaced by full tabs screen later)
@@ -49,6 +65,21 @@ export default function OnboardingScreen() {
             <View className="button-primary px-8">
               <Text className="button-primary__text">Choose a Language</Text>
             </View>
+          </Pressable>
+
+          {/* Dev helper: clear persisted storage to re-test language selection */}
+          <Pressable
+            onPress={handleClearStorage}
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.6 : 1,
+              marginTop: 16,
+            })}
+            accessibilityRole="button"
+            accessibilityLabel="Clear storage"
+          >
+            <Text className="text-body-sm text-center text-text-secondary underline">
+              Clear storage (testing)
+            </Text>
           </Pressable>
         </View>
       </SafeAreaView>
