@@ -7,6 +7,8 @@ import palace from "@/assets/images/palace.png";
 import streakFire from "@/assets/images/streak-fire.png";
 import cafeBanner from "@/assets/images/cafe-banner.jpg";
 import cafeTableIcon from "@/assets/images/cafe-table-icon.jpg";
+import mascotTeacher from "@/assets/images/mascot-teacher.jpg";
+import studentAvatar from "@/assets/images/student-avatar.jpg";
 
 export const images = {
   mascotLogo,
@@ -18,6 +20,9 @@ export const images = {
   streakFire,
   cafeBanner,
   cafeTableIcon,
+  mascotTeacher,
+  studentAvatar,
 } as const;
+
 
 
