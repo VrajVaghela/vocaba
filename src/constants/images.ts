@@ -5,6 +5,8 @@ import earth from "@/assets/images/earth.png";
 import treasure from "@/assets/images/treasure.png";
 import palace from "@/assets/images/palace.png";
 import streakFire from "@/assets/images/streak-fire.png";
+import cafeBanner from "@/assets/images/cafe-banner.jpg";
+import cafeTableIcon from "@/assets/images/cafe-table-icon.jpg";
 
 export const images = {
   mascotLogo,
@@ -14,6 +16,8 @@ export const images = {
   treasure,
   palace,
   streakFire,
+  cafeBanner,
+  cafeTableIcon,
 } as const;
 
 

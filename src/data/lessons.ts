@@ -615,5 +615,404 @@ Check that they pronounce "Konnichiwa" with a double 'n' and that the final syll
         }
       }
     ]
+  },
+
+  // ==========================================
+  // KOREAN LESSONS (ko-unit-1)
+  // ==========================================
+  {
+    id: 'ko-unit-1-lesson-1',
+    unitId: 'ko-unit-1',
+    title: 'Hangul Basics',
+    description: 'Learn the foundational sounds of the Korean alphabet (Hangul).',
+    type: 'video',
+    xpReward: 50,
+    durationMinutes: 5,
+    goals: [
+      { id: 'ko-u1l1-g1', description: 'Recognize basic Hangul consonants' },
+      { id: 'ko-u1l1-g2', description: 'Pronounce simple vowel sounds' }
+    ],
+    vocabularyList: [
+      { id: 'ko-v1', word: '한글 (Hangul)', translation: 'Korean Alphabet', pronunciation: 'han-geul' }
+    ],
+    activities: [
+      {
+        id: 'ko-u1l1-a1',
+        type: 'video_lesson',
+        points: 20,
+        content: {
+          type: 'video_lesson',
+          videoUrl: 'https://assets.vocaba.app/videos/ko_hangul.mp4',
+          durationSeconds: 150,
+          teacherName: 'Ji-Yeon',
+          title: 'Introduction to Hangul',
+          transcript: 'Annyeonghaseyo! Welcome to Korean! Today we study Hangul.'
+        }
+      }
+    ]
+  },
+  {
+    id: 'ko-unit-1-lesson-2',
+    unitId: 'ko-unit-1',
+    title: 'Greetings & Bows',
+    description: 'Learn polite Korean greetings and bowing etiquette.',
+    type: 'audio',
+    xpReward: 50,
+    durationMinutes: 4,
+    goals: [
+      { id: 'ko-u1l2-g1', description: 'Say Annyeonghaseyo clearly' },
+      { id: 'ko-u1l2-g2', description: 'Understand polite tone levels' }
+    ],
+    activities: [
+      {
+        id: 'ko-u1l2-a1',
+        type: 'audio_lesson',
+        points: 20,
+        content: {
+          type: 'audio_lesson',
+          audioUrl: 'https://assets.vocaba.app/audio/ko_greetings.mp3',
+          durationSeconds: 120,
+          teacherName: 'Min-Jun',
+          title: 'Polite Greetings'
+        }
+      }
+    ]
+  },
+  {
+    id: 'ko-unit-1-lesson-3',
+    unitId: 'ko-unit-1',
+    title: 'Introducing Yourself',
+    description: 'Learn how to state your name and nationality in Korean.',
+    type: 'chat',
+    xpReward: 60,
+    durationMinutes: 6,
+    goals: [
+      { id: 'ko-u1l3-g1', description: 'State your name using "... ieyo"' }
+    ],
+    activities: [
+      {
+        id: 'ko-u1l3-a1',
+        type: 'chat_tutor',
+        points: 30,
+        content: {
+          type: 'chat_tutor',
+          scenario: 'Meet a new classmate in Seoul and exchange names.',
+          role: 'Classmate (Sujin)',
+          systemPrompt: 'You are Sujin, a friendly university student. Greet the user in Korean.',
+          initialMessage: '안녕하세요! 저는 수진이에요. 이름이 뭐예요?'
+        }
+      }
+    ]
+  },
+  {
+    id: 'ko-unit-1-lesson-4',
+    unitId: 'ko-unit-1',
+    title: 'Basic Phrases',
+    description: 'Master everyday Korean words like Yes, No, and Excuse me.',
+    type: 'vocabulary',
+    xpReward: 50,
+    durationMinutes: 5,
+    goals: [
+      { id: 'ko-u1l4-g1', description: 'Learn "Ne", "Aniyo", and "Jeogiyo"' }
+    ],
+    activities: [
+      {
+        id: 'ko-u1l4-a1',
+        type: 'multiple_choice',
+        points: 15,
+        content: {
+          type: 'multiple_choice',
+          question: 'How do you say "Yes" politely in Korean?',
+          options: ['네 (Ne)', '아니요 (Aniyo)', '감사합니다 (Gamsahabnida)', '저기요 (Jeogiyo)'],
+          correctAnswerIndex: 0
+        }
+      }
+    ]
+  },
+  {
+    id: 'ko-unit-1-lesson-5',
+    unitId: 'ko-unit-1',
+    title: 'Saying Thank You',
+    description: 'Express gratitude and polite appreciation in Korean.',
+    type: 'review',
+    xpReward: 50,
+    durationMinutes: 5,
+    goals: [
+      { id: 'ko-u1l5-g1', description: 'Say Gamsahabnida with correct pronunciation' }
+    ],
+    activities: [
+      {
+        id: 'ko-u1l5-a1',
+        type: 'speak_phrase',
+        points: 20,
+        content: {
+          type: 'speak_phrase',
+          phrase: '감사합니다',
+          translation: 'Thank you'
+        }
+      }
+    ]
+  },
+
+  // ==========================================
+  // GERMAN LESSONS (de-unit-1)
+  // ==========================================
+  {
+    id: 'de-unit-1-lesson-1',
+    unitId: 'de-unit-1',
+    title: 'German Greetings',
+    description: 'Learn common German greetings like Hallo and Guten Tag.',
+    type: 'video',
+    xpReward: 50,
+    durationMinutes: 5,
+    goals: [
+      { id: 'de-u1l1-g1', description: 'Differentiate between formal and informal greetings' }
+    ],
+    activities: [
+      {
+        id: 'de-u1l1-a1',
+        type: 'video_lesson',
+        points: 20,
+        content: {
+          type: 'video_lesson',
+          videoUrl: 'https://assets.vocaba.app/videos/de_greetings.mp4',
+          durationSeconds: 150,
+          teacherName: 'Lukas',
+          title: 'German Greetings'
+        }
+      }
+    ]
+  },
+  {
+    id: 'de-unit-1-lesson-2',
+    unitId: 'de-unit-1',
+    title: 'Introducing Yourself',
+    description: 'State your name and ask for someone else\'s name in German.',
+    type: 'audio',
+    xpReward: 50,
+    durationMinutes: 4,
+    goals: [
+      { id: 'de-u1l2-g1', description: 'Say "Ich heiße..." or "Mein Name ist..."' }
+    ],
+    activities: [
+      {
+        id: 'de-u1l2-a1',
+        type: 'audio_lesson',
+        points: 20,
+        content: {
+          type: 'audio_lesson',
+          audioUrl: 'https://assets.vocaba.app/audio/de_intro.mp3',
+          durationSeconds: 120,
+          teacherName: 'Emma',
+          title: 'German Introductions'
+        }
+      }
+    ]
+  },
+  {
+    id: 'de-unit-1-lesson-3',
+    unitId: 'de-unit-1',
+    title: 'Saying Goodbye',
+    description: 'Learn common German phrases for parting ways.',
+    type: 'chat',
+    xpReward: 60,
+    durationMinutes: 5,
+    goals: [
+      { id: 'de-u1l3-g1', description: 'Say "Auf Wiedersehen" and "Tschüss"' }
+    ],
+    activities: [
+      {
+        id: 'de-u1l3-a1',
+        type: 'chat_tutor',
+        points: 30,
+        content: {
+          type: 'chat_tutor',
+          scenario: 'Say goodbye to your German business partner at a train station.',
+          role: 'Partner (Stefan)',
+          systemPrompt: 'You are Stefan, a German business partner. Keep it formal and polite.',
+          initialMessage: 'Es war mir ein Vergnügen, Sie kennenzulernen. Auf Wiedersehen!'
+        }
+      }
+    ]
+  },
+  {
+    id: 'de-unit-1-lesson-4',
+    unitId: 'de-unit-1',
+    title: 'German Numbers 1-10',
+    description: 'Learn to count from one to ten in German.',
+    type: 'vocabulary',
+    xpReward: 50,
+    durationMinutes: 5,
+    goals: [
+      { id: 'de-u1l4-g1', description: 'Count 1 to 10 in German' }
+    ],
+    activities: [
+      {
+        id: 'de-u1l4-a1',
+        type: 'multiple_choice',
+        points: 15,
+        content: {
+          type: 'multiple_choice',
+          question: 'What is the German number for "Five"?',
+          options: ['Vier', 'Fünf', 'Drei', 'Eins'],
+          correctAnswerIndex: 1
+        }
+      }
+    ]
+  },
+  {
+    id: 'de-unit-1-lesson-5',
+    unitId: 'de-unit-1',
+    title: 'Polite Expressions',
+    description: 'Master saying please, thank you, and excuse me in German.',
+    type: 'review',
+    xpReward: 50,
+    durationMinutes: 5,
+    goals: [
+      { id: 'de-u1l5-g1', description: 'Learn "Bitte", "Danke", and "Entschuldigung"' }
+    ],
+    activities: [
+      {
+        id: 'de-u1l5-a1',
+        type: 'speak_phrase',
+        points: 20,
+        content: {
+          type: 'speak_phrase',
+          phrase: 'Danke schön',
+          translation: 'Thank you very much'
+        }
+      }
+    ]
+  },
+
+  // ==========================================
+  // CHINESE LESSONS (zh-unit-1)
+  // ==========================================
+  {
+    id: 'zh-unit-1-lesson-1',
+    unitId: 'zh-unit-1',
+    title: 'Pinyin & Tones',
+    description: 'Learn the four Chinese tones and basic Pinyin structure.',
+    type: 'video',
+    xpReward: 50,
+    durationMinutes: 5,
+    goals: [
+      { id: 'zh-u1l1-g1', description: 'Understand the four main tones' }
+    ],
+    activities: [
+      {
+        id: 'zh-u1l1-a1',
+        type: 'video_lesson',
+        points: 20,
+        content: {
+          type: 'video_lesson',
+          videoUrl: 'https://assets.vocaba.app/videos/zh_tones.mp4',
+          durationSeconds: 150,
+          teacherName: 'Mei-Ling',
+          title: 'Chinese Tones'
+        }
+      }
+    ]
+  },
+  {
+    id: 'zh-unit-1-lesson-2',
+    unitId: 'zh-unit-1',
+    title: 'Hello (Ni Hao)',
+    description: 'Say hello and ask how someone is in Chinese.',
+    type: 'audio',
+    xpReward: 50,
+    durationMinutes: 4,
+    goals: [
+      { id: 'zh-u1l2-g1', description: 'Say "Nǐ hǎo" and "Nǐ hǎo ma?"' }
+    ],
+    activities: [
+      {
+        id: 'zh-u1l2-a1',
+        type: 'audio_lesson',
+        points: 20,
+        content: {
+          type: 'audio_lesson',
+          audioUrl: 'https://assets.vocaba.app/audio/zh_greetings.mp3',
+          durationSeconds: 120,
+          teacherName: 'Chen',
+          title: 'Basic Chinese Greetings'
+        }
+      }
+    ]
+  },
+  {
+    id: 'zh-unit-1-lesson-3',
+    unitId: 'zh-unit-1',
+    title: 'Introducing Yourself',
+    description: 'Learn to state your name using "Wǒ jiào".',
+    type: 'chat',
+    xpReward: 60,
+    durationMinutes: 6,
+    goals: [
+      { id: 'zh-u1l3-g1', description: 'State your name in Chinese' }
+    ],
+    activities: [
+      {
+        id: 'zh-u1l3-a1',
+        type: 'chat_tutor',
+        points: 30,
+        content: {
+          type: 'chat_tutor',
+          scenario: 'Meet a business associate in Beijing and say your name.',
+          role: 'Associate (Wang)',
+          systemPrompt: 'You are Mr. Wang, a polite business associate in Beijing.',
+          initialMessage: '你好！我叫王明。你叫什么名字？'
+        }
+      }
+    ]
+  },
+  {
+    id: 'zh-unit-1-lesson-4',
+    unitId: 'zh-unit-1',
+    title: 'Numbers & Counting',
+    description: 'Count from one to ten in Mandarin Chinese.',
+    type: 'vocabulary',
+    xpReward: 50,
+    durationMinutes: 5,
+    goals: [
+      { id: 'zh-u1l4-g1', description: 'Count 1 to 10 in Mandarin' }
+    ],
+    activities: [
+      {
+        id: 'zh-u1l4-a1',
+        type: 'multiple_choice',
+        points: 15,
+        content: {
+          type: 'multiple_choice',
+          question: 'What is the Chinese character for "Three"?',
+          options: ['一 (yī)', '二 (èr)', '三 (sān)', '四 (sì)'],
+          correctAnswerIndex: 2
+        }
+      }
+    ]
+  },
+  {
+    id: 'zh-unit-1-lesson-5',
+    unitId: 'zh-unit-1',
+    title: 'Saying Goodbye',
+    description: 'Learn common Chinese phrases for saying goodbye.',
+    type: 'review',
+    xpReward: 50,
+    durationMinutes: 5,
+    goals: [
+      { id: 'zh-u1l5-g1', description: 'Say "Zàijiàn" correctly' }
+    ],
+    activities: [
+      {
+        id: 'zh-u1l5-a1',
+        type: 'speak_phrase',
+        points: 20,
+        content: {
+          type: 'speak_phrase',
+          phrase: '再见',
+          translation: 'Goodbye'
+        }
+      }
+    ]
   }
 ];

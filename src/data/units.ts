@@ -54,4 +54,34 @@ export const units: Unit[] = [
     level: 'Beginner',
     order: 2,
   },
+
+  // Korean Units
+  {
+    id: 'ko-unit-1',
+    languageId: 'ko',
+    title: 'Hangul & Core Basics',
+    description: 'Learn the Korean alphabet, basic greetings, and simple self-introductions.',
+    level: 'Beginner',
+    order: 1,
+  },
+
+  // German Units
+  {
+    id: 'de-unit-1',
+    languageId: 'de',
+    title: 'German Foundations',
+    description: 'Learn fundamental German greetings, numbers, and basic sentence structure.',
+    level: 'Beginner',
+    order: 1,
+  },
+
+  // Chinese Units
+  {
+    id: 'zh-unit-1',
+    languageId: 'zh',
+    title: 'Pinyin & Basic Greetings',
+    description: 'Learn Chinese tones, Pinyin system, and essential everyday greetings.',
+    level: 'Beginner',
+    order: 1,
+  },
 ];
