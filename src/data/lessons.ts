@@ -1,0 +1,619 @@
+import { Lesson } from '../types/learning';
+
+export const lessons: Lesson[] = [
+  // ==========================================
+  // SPANISH LESSONS (es-unit-1)
+  // ==========================================
+  {
+    id: 'es-unit-1-lesson-1',
+    unitId: 'es-unit-1',
+    title: 'Greetings & Basics',
+    description: 'Learn how to say hello, ask how someone is, and say goodbye in Spanish.',
+    type: 'video',
+    xpReward: 50,
+    durationMinutes: 5,
+    goals: [
+      { id: 'es-u1l1-g1', description: 'Learn to say hello and goodbye' },
+      { id: 'es-u1l1-g2', description: 'Ask how someone is doing in Spanish' }
+    ],
+    vocabularyList: [
+      {
+        id: 'es-v1',
+        word: 'Hola',
+        translation: 'Hello',
+        pronunciation: 'oh-lah',
+        partOfSpeech: 'interjection',
+        exampleSentence: 'Hola, ¿cómo estás?',
+        exampleTranslation: 'Hello, how are you?'
+      },
+      {
+        id: 'es-v2',
+        word: 'Buenos días',
+        translation: 'Good morning',
+        pronunciation: 'bweh-nos dee-ahs',
+        partOfSpeech: 'phrase',
+        exampleSentence: 'Buenos días, mi amigo.',
+        exampleTranslation: 'Good morning, my friend.'
+      },
+      {
+        id: 'es-v3',
+        word: 'Adiós',
+        translation: 'Goodbye',
+        pronunciation: 'ah-dyohs',
+        partOfSpeech: 'interjection',
+        exampleSentence: 'Adiós, nos vemos mañana.',
+        exampleTranslation: 'Goodbye, see you tomorrow.'
+      }
+    ],
+    phrasesList: [
+      {
+        id: 'es-p1',
+        phrase: '¿Cómo estás?',
+        translation: 'How are you?',
+        pronunciation: 'coh-moh es-tahs',
+        context: 'Friendly informal greeting'
+      },
+      {
+        id: 'es-p2',
+        phrase: 'Estoy bien, gracias.',
+        translation: 'I am doing well, thank you.',
+        pronunciation: 'es-toy byen, grah-syahs',
+        context: 'Response to how you are'
+      }
+    ],
+    aiTeacherPrompt: `You are Sofia, a warm and encouraging AI Spanish teacher.
+Your goal is to guide the user in learning basic Spanish greetings.
+Assess if the user's spoken greetings are clear.
+Focus on:
+1. The silent 'h' in 'Hola' (should not sound like an English 'h').
+2. The clear vowel sounds.
+Provide constructive, positive feedback to keep the student motivated.`,
+    activities: [
+      {
+        id: 'es-u1l1-a1',
+        type: 'video_lesson',
+        points: 20,
+        content: {
+          type: 'video_lesson',
+          videoUrl: 'https://assets.vocaba.app/videos/es_greetings_sofia.mp4',
+          durationSeconds: 150,
+          teacherName: 'Sofia',
+          title: 'Spanish Greetings 101',
+          transcript: '¡Hola! Welcome to Vocaba. I am Sofia, your AI teacher. Today we are learning basic greetings. To say hello, we say "Hola". Keep in mind the "H" is silent! Try saying it: "Hola". Excellent. For "Good morning", we say "Buenos días". And when asking how someone is, we say "¿Cómo estás?". Perfect! Let\'s practice these!',
+          aiTeacherPrompt: 'Evaluate the user repeating "Hola" and "Buenos días". Pay attention to silent "H" and correct stress on "días".'
+        }
+      },
+      {
+        id: 'es-u1l1-a2',
+        type: 'multiple_choice',
+        points: 10,
+        content: {
+          type: 'multiple_choice',
+          question: 'What does "Buenos días" mean?',
+          options: ['Good evening', 'Good morning', 'Goodbye', 'How are you?'],
+          correctAnswerIndex: 1,
+          explanation: '"Buenos días" translates to "Good morning" and is commonly used until noon.'
+        }
+      },
+      {
+        id: 'es-u1l1-a3',
+        type: 'speak_phrase',
+        points: 10,
+        content: {
+          type: 'speak_phrase',
+          phrase: '¿Cómo estás?',
+          translation: 'How are you?',
+          pronunciation: 'coh-moh es-tahs'
+        }
+      },
+      {
+        id: 'es-u1l1-a4',
+        type: 'translate',
+        points: 10,
+        content: {
+          type: 'translate',
+          direction: 'to_target',
+          sentence: 'Hello, I am well.',
+          translation: 'Hola, estoy bien.',
+          options: ['Hola,', 'estoy', 'bien.', 'gracias.', 'cómo', 'estás']
+        }
+      }
+    ]
+  },
+  {
+    id: 'es-unit-1-lesson-2',
+    unitId: 'es-unit-1',
+    title: 'Introducing Yourself',
+    description: 'Learn to state your name and ask for someone else\'s name.',
+    type: 'audio',
+    xpReward: 50,
+    durationMinutes: 4,
+    goals: [
+      { id: 'es-u1l2-g1', description: 'Introduce your name using "Me llamo"' },
+      { id: 'es-u1l2-g2', description: 'Ask someone\'s name using "¿Cómo te llamas?"' }
+    ],
+    vocabularyList: [
+      {
+        id: 'es-v4',
+        word: 'Me llamo',
+        translation: 'My name is / I call myself',
+        pronunciation: 'meh yah-moh',
+        partOfSpeech: 'phrase',
+        exampleSentence: 'Me llamo Carlos.',
+        exampleTranslation: 'My name is Carlos.'
+      },
+      {
+        id: 'es-v5',
+        word: 'Mucho gusto',
+        translation: 'Nice to meet you',
+        pronunciation: 'moo-choh goos-toh',
+        partOfSpeech: 'phrase',
+        exampleSentence: 'Mucho gusto, señora.',
+        exampleTranslation: 'Nice to meet you, ma\'am.'
+      }
+    ],
+    phrasesList: [
+      {
+        id: 'es-p3',
+        phrase: '¿Cómo te llamas?',
+        translation: 'What is your name?',
+        pronunciation: 'coh-moh teh yah-mahs',
+        context: 'Asking someone\'s name informally'
+      }
+    ],
+    aiTeacherPrompt: `You are Alejandro, a friendly Spanish conversation partner.
+Help the user practice introducing themselves. Listen to their pronunciation of the double 'll' (sound like 'y') in 'llamas' and 'llamo'.`,
+    activities: [
+      {
+        id: 'es-u1l2-a1',
+        type: 'audio_lesson',
+        points: 20,
+        content: {
+          type: 'audio_lesson',
+          audioUrl: 'https://assets.vocaba.app/audio/es_intro_alejandro.mp3',
+          durationSeconds: 120,
+          teacherName: 'Alejandro',
+          title: 'Introducing Yourself',
+          transcript: 'Hola, soy Alejandro. Mucho gusto! Today we learn how to say our name. In Spanish, we say "Me llamo" followed by our name. So, "Me llamo Alejandro". How would you say your name? Try: "Me llamo" and then your name. Perfect! Now, to ask for my name, ask: "¿Cómo te llamas?" Let\'s try!',
+          aiTeacherPrompt: 'Verify if the user says "Me llamo [name]" and "¿Cómo te llamas?" with a clear "ll" sound (y-sound).'
+        }
+      },
+      {
+        id: 'es-u1l2-a2',
+        type: 'vocabulary_match',
+        points: 15,
+        content: {
+          type: 'vocabulary_match',
+          pairs: [
+            { word: 'Me llamo', translation: 'My name is' },
+            { word: 'Mucho gusto', translation: 'Nice to meet you' },
+            { word: 'Hola', translation: 'Hello' },
+            { word: 'Adiós', translation: 'Goodbye' }
+          ]
+        }
+      },
+      {
+        id: 'es-u1l2-a3',
+        type: 'speak_phrase',
+        points: 15,
+        content: {
+          type: 'speak_phrase',
+          phrase: 'Mucho gusto',
+          translation: 'Nice to meet you',
+          pronunciation: 'moo-choh goos-toh'
+        }
+      }
+    ]
+  },
+  {
+    id: 'es-unit-1-lesson-3',
+    unitId: 'es-unit-1',
+    title: 'Ordering Coffee',
+    description: 'Use your Spanish to order a drink at a cafe and use polite expressions.',
+    type: 'chat',
+    xpReward: 60,
+    durationMinutes: 6,
+    goals: [
+      { id: 'es-u1l3-g1', description: 'Order a coffee in Spanish' },
+      { id: 'es-u1l3-g2', description: 'Say please and thank you' }
+    ],
+    vocabularyList: [
+      {
+        id: 'es-v6',
+        word: 'Café',
+        translation: 'Coffee',
+        pronunciation: 'cah-feh',
+        partOfSpeech: 'noun',
+        exampleSentence: 'Un café, por favor.',
+        exampleTranslation: 'A coffee, please.'
+      },
+      {
+        id: 'es-v7',
+        word: 'Por favor',
+        translation: 'Please',
+        pronunciation: 'por fah-vor',
+        partOfSpeech: 'phrase',
+        exampleSentence: 'Agua, por favor.',
+        exampleTranslation: 'Water, please.'
+      },
+      {
+        id: 'es-v8',
+        word: 'Gracias',
+        translation: 'Thank you',
+        pronunciation: 'grah-syahs',
+        partOfSpeech: 'interjection',
+        exampleSentence: 'Muchas gracias por la comida.',
+        exampleTranslation: 'Thank you very much for the food.'
+      }
+    ],
+    activities: [
+      {
+        id: 'es-u1l3-a1',
+        type: 'chat_tutor',
+        points: 30,
+        content: {
+          type: 'chat_tutor',
+          scenario: 'You are at a lively cafe in Madrid, Spain. Order a coffee and a croissant from the barista.',
+          role: 'Barista (Mateo)',
+          systemPrompt: 'You are Mateo, a friendly barista at a cafe in Madrid. Keep your responses short, conversational, and simple for a beginner. Help the user if they make mistakes. Respond in Spanish, and encourage them to order in Spanish.',
+          initialMessage: '¡Hola! Bienvenidos a Café Central. ¿Qué te gustaría tomar hoy?'
+        }
+      },
+      {
+        id: 'es-u1l3-a2',
+        type: 'multiple_choice',
+        points: 15,
+        content: {
+          type: 'multiple_choice',
+          question: 'How do you say "A coffee, please" in Spanish?',
+          options: [
+            'Un té, gracias',
+            'Un café, por favor',
+            'Mucho gusto café',
+            'Hola café'
+          ],
+          correctAnswerIndex: 1,
+          explanation: '"Un café" means "a coffee" and "por favor" means "please".'
+        }
+      },
+      {
+        id: 'es-u1l3-a3',
+        type: 'translate',
+        points: 15,
+        content: {
+          type: 'translate',
+          direction: 'to_source',
+          sentence: 'Muchas gracias.',
+          translation: 'Thank you very much.',
+          options: ['Thank', 'you', 'very', 'much.', 'Please', 'Good']
+        }
+      }
+    ]
+  },
+
+  // ==========================================
+  // FRENCH LESSONS (fr-unit-1)
+  // ==========================================
+  {
+    id: 'fr-unit-1-lesson-1',
+    unitId: 'fr-unit-1',
+    title: 'French Salutations',
+    description: 'Learn French greetings for different times of the day.',
+    type: 'video',
+    xpReward: 50,
+    durationMinutes: 5,
+    goals: [
+      { id: 'fr-u1l1-g1', description: 'Learn "Bonjour", "Salut", and "Bonsoir"' },
+      { id: 'fr-u1l1-g2', description: 'Understand basic French salutations' }
+    ],
+    vocabularyList: [
+      {
+        id: 'fr-v1',
+        word: 'Bonjour',
+        translation: 'Hello / Good morning',
+        pronunciation: 'bohn-zhoor',
+        partOfSpeech: 'interjection',
+        exampleSentence: 'Bonjour, comment ça va ?',
+        exampleTranslation: 'Hello, how is it going?'
+      },
+      {
+        id: 'fr-v2',
+        word: 'Salut',
+        translation: 'Hi / Bye (informal)',
+        pronunciation: 'sah-loo',
+        partOfSpeech: 'interjection',
+        exampleSentence: 'Salut ! Ça va ?',
+        exampleTranslation: 'Hi! How are things?'
+      },
+      {
+        id: 'fr-v3',
+        word: 'Au revoir',
+        translation: 'Goodbye',
+        pronunciation: 'oh ruh-vwahr',
+        partOfSpeech: 'interjection',
+        exampleSentence: 'Au revoir et bonne journée.',
+        exampleTranslation: 'Goodbye and have a good day.'
+      }
+    ],
+    phrasesList: [
+      {
+        id: 'fr-p1',
+        phrase: 'Comment ça va ?',
+        translation: 'How is it going?',
+        pronunciation: 'coh-mahn sah vah',
+        context: 'Common greeting among acquaintances'
+      }
+    ],
+    aiTeacherPrompt: `You are Marie, an elegant and kind AI French teacher.
+Guide the user to pronounce nasal French sounds like the 'on' in 'Bonjour' or 'Comment'.
+Encourage the user to make soft, correct sounds.`,
+    activities: [
+      {
+        id: 'fr-u1l1-a1',
+        type: 'video_lesson',
+        points: 20,
+        content: {
+          type: 'video_lesson',
+          videoUrl: 'https://assets.vocaba.app/videos/fr_salutations_marie.mp4',
+          durationSeconds: 140,
+          teacherName: 'Marie',
+          title: 'French Greetings',
+          transcript: 'Bonjour ! Welcome to your first French lesson. I am Marie. In French, we greet people by saying "Bonjour". It literally means "Good day". For friends, we can use the informal "Salut", which means "Hi". Let\'s practice: "Bonjour". Magnifique ! Now let\'s try: "Salut". Very good!',
+          aiTeacherPrompt: 'Check if the user is saying "Bonjour" and "Salut" with appropriate French accent and soft "j" and silent "t" respectively.'
+        }
+      },
+      {
+        id: 'fr-u1l1-a2',
+        type: 'multiple_choice',
+        points: 15,
+        content: {
+          type: 'multiple_choice',
+          question: 'What is the informal word for both "Hi" and "Bye" in French?',
+          options: ['Bonjour', 'Salut', 'Au revoir', 'Bonsoir'],
+          correctAnswerIndex: 1,
+          explanation: '"Salut" is an informal term used both to say hello and goodbye among friends.'
+        }
+      },
+      {
+        id: 'fr-u1l1-a3',
+        type: 'speak_phrase',
+        points: 15,
+        content: {
+          type: 'speak_phrase',
+          phrase: 'Au revoir',
+          translation: 'Goodbye',
+          pronunciation: 'oh ruh-vwahr'
+        }
+      }
+    ]
+  },
+  {
+    id: 'fr-unit-1-lesson-2',
+    unitId: 'fr-unit-1',
+    title: 'At a Parisian Bistro',
+    description: 'Practice ordering items and using polite phrases in a cafe.',
+    type: 'chat',
+    xpReward: 60,
+    durationMinutes: 5,
+    goals: [
+      { id: 'fr-u1l2-g1', description: 'Order a croissant and water' },
+      { id: 'fr-u1l2-g2', description: 'Use "s\'il vous plaît" (please)' }
+    ],
+    vocabularyList: [
+      {
+        id: 'fr-v4',
+        word: 'Un café',
+        translation: 'A coffee',
+        pronunciation: 'uh cah-feh',
+        partOfSpeech: 'noun',
+        exampleSentence: 'Un café, s\'il vous plaît.',
+        exampleTranslation: 'A coffee, please.'
+      },
+      {
+        id: 'fr-v5',
+        word: 'Un croissant',
+        translation: 'A croissant',
+        pronunciation: 'uh crwah-sahn',
+        partOfSpeech: 'noun',
+        exampleSentence: 'Je voudrais un croissant.',
+        exampleTranslation: 'I would like a croissant.'
+      },
+      {
+        id: 'fr-v6',
+        word: 'S\'il vous plaît',
+        translation: 'Please (formal/polite)',
+        pronunciation: 'seel voo pleh',
+        partOfSpeech: 'phrase',
+        exampleSentence: 'L\'addition, s\'il vous plaît.',
+        exampleTranslation: 'The bill, please.'
+      }
+    ],
+    activities: [
+      {
+        id: 'fr-u1l2-a1',
+        type: 'chat_tutor',
+        points: 30,
+        content: {
+          type: 'chat_tutor',
+          scenario: 'Order a coffee and a croissant from a server at a busy Parisian bistro.',
+          role: 'Server (Pierre)',
+          systemPrompt: 'You are Pierre, a polite server at a bistro in Paris. Greet the customer and take their order. Keep your French simple, using clear phrases. Guide them if they forget polite phrases like "s\'il vous plaît" or "merci".',
+          initialMessage: 'Bonjour ! Bienvenue au Bistro de Paris. Qu\'est-ce que ce sera pour vous ?'
+        }
+      },
+      {
+        id: 'fr-u1l2-a2',
+        type: 'translate',
+        points: 30,
+        content: {
+          type: 'translate',
+          direction: 'to_target',
+          sentence: 'A coffee, please.',
+          translation: 'Un café, s\'il vous plaît.',
+          options: ['Un', 'café,', 's\'il', 'vous', 'plaît.', 'croissant', 'bonjour']
+        }
+      }
+    ]
+  },
+
+  // ==========================================
+  // JAPANESE LESSONS (ja-unit-1)
+  // ==========================================
+  {
+    id: 'ja-unit-1-lesson-1',
+    unitId: 'ja-unit-1',
+    title: 'Japanese Greetings',
+    description: 'Learn basic everyday Japanese greetings and bowing manners.',
+    type: 'video',
+    xpReward: 50,
+    durationMinutes: 5,
+    goals: [
+      { id: 'ja-u1l1-g1', description: 'Learn "Konnichiwa" and "Ohayou"' },
+      { id: 'ja-u1l1-g2', description: 'Understand basic politeness levels' }
+    ],
+    vocabularyList: [
+      {
+        id: 'ja-v1',
+        word: 'こんにちは (Konnichiwa)',
+        translation: 'Hello / Good afternoon',
+        pronunciation: 'kon-nee-chee-wah',
+        partOfSpeech: 'interjection',
+        exampleSentence: '皆さん、こんにちは。',
+        exampleTranslation: 'Hello, everyone.'
+      },
+      {
+        id: 'ja-v2',
+        word: 'おはようございます (Ohayou gozaimasu)',
+        translation: 'Good morning (formal)',
+        pronunciation: 'oh-hah-yoh goh-zye-mas',
+        partOfSpeech: 'phrase',
+        exampleSentence: '先生、おはようございます。',
+        exampleTranslation: 'Good morning, teacher.'
+      },
+      {
+        id: 'ja-v3',
+        word: 'ありがとう (Arigatou)',
+        translation: 'Thank you (informal)',
+        pronunciation: 'ah-ree-gah-toh',
+        partOfSpeech: 'interjection',
+        exampleSentence: '手伝ってくれて、ありがとう。',
+        exampleTranslation: 'Thank you for helping me.'
+      }
+    ],
+    phrasesList: [
+      {
+        id: 'ja-p1',
+        phrase: 'はじめまして (Hajimemashite)',
+        translation: 'Nice to meet you / How do you do?',
+        pronunciation: 'hah-jee-meh-mah-shee-teh',
+        context: 'Said when meeting someone for the first time'
+      }
+    ],
+    aiTeacherPrompt: `You are Yuki, a polite and helpful Japanese AI teacher.
+Help the user master basic greetings. Listen to the pitch accent and syllable pacing (moras).
+Check that they pronounce "Konnichiwa" with a double 'n' and that the final syllable 'wa' (written as 'ha') is soft.`,
+    activities: [
+      {
+        id: 'ja-u1l1-a1',
+        type: 'video_lesson',
+        points: 20,
+        content: {
+          type: 'video_lesson',
+          videoUrl: 'https://assets.vocaba.app/videos/ja_greetings_yuki.mp4',
+          durationSeconds: 160,
+          teacherName: 'Yuki',
+          title: 'Japanese Greetings',
+          transcript: 'はじめまして！ Nice to meet you. I am Yuki, your Vocaba Japanese teacher. In Japan, greetings are very important. During the day, we say "こんにちは" (Konnichiwa). In the morning, we formally say "おはようございます" (Ohayou gozaimasu). Let\'s try saying them together. First, "Konnichiwa". Excellent! Next, "Ohayou gozaimasu". Well done!',
+          aiTeacherPrompt: 'Assess user\'s attempt to say "Konnichiwa" and "Ohayou gozaimasu". Ensure correct syllable length and clean pronunciation.'
+        }
+      },
+      {
+        id: 'ja-u1l1-a2',
+        type: 'multiple_choice',
+        points: 15,
+        content: {
+          type: 'multiple_choice',
+          question: 'What is the polite way to say "Good morning" in Japanese?',
+          options: [
+            'こんにちは (Konnichiwa)',
+            'ありがとう (Arigatou)',
+            'おはようございます (Ohayou gozaimasu)',
+            'さようなら (Sayounara)'
+          ],
+          correctAnswerIndex: 2,
+          explanation: '"Ohayou gozaimasu" is the formal greeting used in the morning. "Ohayou" by itself is informal.'
+        }
+      },
+      {
+        id: 'ja-u1l1-a3',
+        type: 'speak_phrase',
+        points: 15,
+        content: {
+          type: 'speak_phrase',
+          phrase: 'はじめまして',
+          translation: 'Nice to meet you',
+          pronunciation: 'hah-jee-meh-mah-shee-teh'
+        }
+      }
+    ]
+  },
+  {
+    id: 'ja-unit-1-lesson-2',
+    unitId: 'ja-unit-1',
+    title: 'Self Introduction (Jikoshoukai)',
+    description: 'Learn to state your name and politely close an introduction in Japanese.',
+    type: 'chat',
+    xpReward: 60,
+    durationMinutes: 6,
+    goals: [
+      { id: 'ja-u1l2-g1', description: 'Introduce your name using "... desu"' },
+      { id: 'ja-u1l2-g2', description: 'Use the polite phrase "Yoroshiku onegaishimasu"' }
+    ],
+    vocabularyList: [
+      {
+        id: 'ja-v4',
+        word: 'です (desu)',
+        translation: 'to be / am / is / are',
+        pronunciation: 'des',
+        partOfSpeech: 'copula',
+        exampleSentence: 'ジョンです。',
+        exampleTranslation: 'I am John.'
+      },
+      {
+        id: 'ja-v5',
+        word: 'よろしくお願いします (Yoroshiku onegaishimasu)',
+        translation: 'Please treat me well / Looking forward to working with you',
+        pronunciation: 'yoh-roh-shee-koo oh-neh-ghee-shee-mahs',
+        partOfSpeech: 'phrase',
+        exampleSentence: 'はじめまして、よろしくお願いします。',
+        exampleTranslation: 'Nice to meet you, please treat me well.'
+      }
+    ],
+    activities: [
+      {
+        id: 'ja-u1l2-a1',
+        type: 'chat_tutor',
+        points: 30,
+        content: {
+          type: 'chat_tutor',
+          scenario: 'Meet a new Japanese colleague at your office. Introduce yourself and say looking forward to working together.',
+          role: 'Colleague (Hiroshi)',
+          systemPrompt: 'You are Hiroshi, a friendly new colleague at a Japanese office. Welcome the user and introduce yourself. Keep your sentences brief and simple. Respond in Japanese (using Hiragana/Katakana and basic Kanji, or Romaji if helpful, but stick to standard simple Japanese). Encourage them to use "... desu" and "Yoroshiku onegaishimasu".',
+          initialMessage: 'はじめまして、ひろしです。今日からよろしくお願いします！お名前は何ですか？'
+        }
+      },
+      {
+        id: 'ja-u1l2-a2',
+        type: 'translate',
+        points: 30,
+        content: {
+          type: 'translate',
+          direction: 'to_target',
+          sentence: 'I am John. Nice to meet you.',
+          translation: 'ジョンです。はじめまして。',
+          options: ['ジョンです。', 'はじめまして。', 'ありがとう。', 'です', 'こんにちは']
+        }
+      }
+    ]
+  }
+];
