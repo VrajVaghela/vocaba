@@ -45,7 +45,19 @@ async function generateJWT(payload: any, secret: string): Promise<string> {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userId, userName, userImage, lessonId, languageId } = body;
+    const {
+      userId,
+      userName,
+      userImage,
+      lessonId,
+      lessonTitle,
+      languageId,
+      languageName,
+      goals,
+      vocabulary,
+      phrases,
+      aiTeacherPrompt,
+    } = body;
 
     if (!userId) {
       return Response.json({ error: "Missing userId" }, { status: 400 });
@@ -99,12 +111,22 @@ export async function POST(request: Request) {
               user_id: userId,
               role: "admin",
             },
+            {
+              user_id: "ai-teacher",
+              role: "admin",
+            },
           ],
           custom: {
             lessonId: lessonId || "",
+            lessonTitle: lessonTitle || "",
             languageId: languageId || "",
+            languageName: languageName || "",
             userName: userName || "",
             userImage: userImage || "",
+            goals: goals || [],
+            vocabulary: vocabulary || [],
+            phrases: phrases || [],
+            aiTeacherPrompt: aiTeacherPrompt || "",
           },
         },
       }),

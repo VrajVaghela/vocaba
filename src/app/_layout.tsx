@@ -7,6 +7,7 @@ import { tokenCache } from "@clerk/expo/token-cache";
 import { PostHogProvider } from "posthog-react-native";
 
 import { colors } from "@/theme";
+import { PostHogIdentifier } from "@/components/PostHogIdentifier";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -41,6 +42,7 @@ export default function RootLayout() {
     >
       <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
         <ClerkLoaded>
+          <PostHogIdentifier />
           <Stack
             screenOptions={{
               contentStyle: { backgroundColor: colors.background },

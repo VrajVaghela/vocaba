@@ -7,6 +7,7 @@ import { images } from "@/constants/images";
 import { colors } from "@/theme/colors";
 import { languages } from "@/data/languages";
 import { useLanguageStore } from "@/store/languageStore";
+import { posthog } from "@/lib/posthog";
 
 export default function LanguageSelectScreen() {
   const router = useRouter();
@@ -24,6 +25,13 @@ export default function LanguageSelectScreen() {
   const handleConfirm = () => {
     if (tempSelectedLanguageId) {
       setSelectedLanguageId(tempSelectedLanguageId);
+      const lang = languages.find((l) => l.id === tempSelectedLanguageId);
+      if (lang) {
+        posthog.capture("language_selected", {
+          language_code: lang.id,
+          language_name: lang.name,
+        });
+      }
       router.replace("/");
     }
   };

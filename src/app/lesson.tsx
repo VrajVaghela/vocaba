@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { StyleSheet, Animated, ActivityIndicator, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -12,6 +12,7 @@ import { units } from "@/data/units";
 import { languages } from "@/data/languages";
 import { images } from "@/constants/images";
 import { useUser } from "@clerk/expo";
+import { posthog } from "@/lib/posthog";
 import {
   StreamVideoClient,
   StreamVideo,
@@ -112,6 +113,9 @@ interface ActiveCallInterfaceProps {
   setLocalMicEnabled: (val: boolean) => void;
   callId: string;
   user: any;
+  agentStatus: "idle" | "connecting" | "connected" | "failed";
+  setAgentStatus: React.Dispatch<React.SetStateAction<"idle" | "connecting" | "connected" | "failed">>;
+  closedCaptions?: any[];
 }
 
 // Presentational Layout Component
@@ -133,12 +137,15 @@ function CallInterfaceLayout({
   subtitlesEnabled,
   setSubtitlesEnabled,
   pulseAnim,
+  rawTeacherName,
   isStream,
   callId,
   user,
   isMuted,
   toggleMic,
   participantCount,
+  agentStatus,
+  closedCaptions,
 }: ActiveCallInterfaceProps & {
   isMuted: boolean;
   toggleMic: () => Promise<void>;
@@ -186,13 +193,29 @@ function CallInterfaceLayout({
           >
             AI Teacher
           </Text>
-          <View className="flex-row items-center mt-0.5">
-            <View className="w-1.5 h-1.5 rounded-full bg-[#21C16B] mr-1.5" />
+          <View className="flex-row items-center mt-0.5 justify-center">
+            {isStream && (
+              <View className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                agentStatus === "connected" ? "bg-[#21C16B]" :
+                agentStatus === "connecting" ? "bg-amber-500" :
+                agentStatus === "failed" ? "bg-red-500" : "bg-gray-400"
+              }`} />
+            )}
             <Text
-              className="text-xs text-text-secondary font-medium"
-              style={{ fontFamily: "Poppins-Medium" }}
+              className="text-xs font-semibold"
+              style={{
+                fontFamily: "Poppins-Medium",
+                color: !isStream ? colors.textSecondary :
+                  agentStatus === "connected" ? "#21C16B" :
+                  agentStatus === "connecting" ? "#F59E0B" :
+                  agentStatus === "failed" ? "#EF4444" : "#6B7280"
+              }}
             >
-              {isStream ? `Stream Room (${participantCount} active)` : "Demo Room"}
+              {isStream ? (
+                agentStatus === "connected" ? `Sofia Joined (${participantCount} active)` :
+                agentStatus === "connecting" ? "Sofia Joining..." :
+                agentStatus === "failed" ? "Sofia Offline" : "Sofia Offline"
+              ) : "Demo Room"}
             </Text>
           </View>
         </View>
@@ -285,19 +308,49 @@ function CallInterfaceLayout({
         {subtitlesEnabled && (
           <View className="absolute bottom-6 left-4 right-4 bg-white rounded-3xl p-5 shadow-xl flex-row items-center justify-between z-20">
             <View className="flex-1 pr-4">
-              <Text
-                className="text-[18px] text-text-primary font-bold leading-snug"
-                style={{ fontFamily: "Poppins-Bold" }}
-              >
-                {activeStep.teacherSpeech}
-              </Text>
-              {/* English subtitles helper toggles inside bubble */}
-              <Text
-                className="text-xs text-text-secondary mt-1 leading-normal font-medium"
-                style={{ fontFamily: "Poppins-Medium" }}
-              >
-                {activeStep.englishTranslation}
-              </Text>
+              {isStream && closedCaptions && closedCaptions.length > 0 ? (
+                <View className="flex-col gap-1.5">
+                  {closedCaptions.map((caption, index) => {
+                    const isTeacher = caption.user?.id === "ai-teacher";
+                    const speakerName = isTeacher ? rawTeacherName : "You";
+                    return (
+                      <View key={index} className="flex-row flex-wrap">
+                        <Text
+                          className="text-sm font-bold"
+                          style={{
+                            fontFamily: "Poppins-Bold",
+                            color: isTeacher ? colors.linguaPurple : "#10B981"
+                          }}
+                        >
+                          {speakerName}:{" "}
+                        </Text>
+                        <Text
+                          className="text-sm text-text-primary font-semibold leading-relaxed flex-1"
+                          style={{ fontFamily: "Poppins-SemiBold" }}
+                        >
+                          {caption.text}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              ) : (
+                <>
+                  <Text
+                    className="text-[18px] text-text-primary font-bold leading-snug"
+                    style={{ fontFamily: "Poppins-Bold" }}
+                  >
+                    {activeStep.teacherSpeech}
+                  </Text>
+                  {/* English subtitles helper toggles inside subtitle box */}
+                  <Text
+                    className="text-xs text-text-secondary mt-1 leading-normal font-medium"
+                    style={{ fontFamily: "Poppins-Medium" }}
+                  >
+                    {activeStep.englishTranslation}
+                  </Text>
+                </>
+              )}
             </View>
 
             {/* Audio Wave Play Button */}
@@ -515,9 +568,10 @@ function CallInterfaceLayout({
 
 // Inner Stream calling component (called only when isStream is true)
 function StreamActiveCallInterface(props: ActiveCallInterfaceProps) {
-  const { useMicrophoneState, useCallSession } = useCallStateHooks();
+  const { useMicrophoneState, useParticipants, useCallClosedCaptions } = useCallStateHooks();
   const { microphone, isMute } = useMicrophoneState();
-  const session = useCallSession();
+  const participants = useParticipants();
+  const closedCaptions = useCallClosedCaptions();
 
   const toggleMic = async () => {
     try {
@@ -527,12 +581,28 @@ function StreamActiveCallInterface(props: ActiveCallInterfaceProps) {
     }
   };
 
+  const agentParticipant = participants.find((p) => p.userId === "ai-teacher");
+  const { agentStatus, setAgentStatus } = props;
+
+  useEffect(() => {
+    if (agentParticipant) {
+      if (agentStatus !== "connected") {
+        setAgentStatus("connected");
+      }
+    } else {
+      if (agentStatus === "connected") {
+        setAgentStatus("idle");
+      }
+    }
+  }, [agentParticipant, agentStatus, setAgentStatus]);
+
   return (
     <CallInterfaceLayout
       {...props}
       isMuted={isMute}
       toggleMic={toggleMic}
-      participantCount={session?.participants?.length || 1}
+      participantCount={participants.length}
+      closedCaptions={closedCaptions}
     />
   );
 }
@@ -574,6 +644,8 @@ export default function LessonScreen() {
   const [errorMessage, setErrorMessage] = useState("");
   const [demoMode, setDemoMode] = useState(false);
   const [localMicEnabled, setLocalMicEnabled] = useState(true);
+  const [agentStatus, setAgentStatus] = useState<"idle" | "connecting" | "connected" | "failed">("idle");
+  const [agentSessionId, setAgentSessionId] = useState<string | null>(null);
 
   // Screen/UI States
   const [cameraEnabled, setCameraEnabled] = useState(true);
@@ -581,6 +653,47 @@ export default function LessonScreen() {
   const [isRecording, setIsRecording] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+
+  // PostHog Tracking references & effect
+  const startTimeRef = useRef<number>(0);
+  const isCompletedRef = useRef<boolean>(false);
+  const currentStepRef = useRef<number>(0);
+
+  useEffect(() => {
+    currentStepRef.current = currentStep;
+  }, [currentStep]);
+
+  useEffect(() => {
+    const getLessonNumber = (id: string): number => {
+      const match = id.match(/lesson-(\d+)/i);
+      if (match) {
+        return parseInt(match[1], 10);
+      }
+      const idx = lessons.findIndex((l) => l.id === id);
+      return idx !== -1 ? idx + 1 : 1;
+    };
+
+    posthog.capture("lesson_started", {
+      lesson_id: lesson.id,
+      language: language.name,
+      lesson_number: getLessonNumber(lesson.id),
+    });
+
+    startTimeRef.current = Date.now();
+    isCompletedRef.current = false;
+
+    return () => {
+      if (!isCompletedRef.current) {
+        const timeIntoLessonSeconds = startTimeRef.current > 0 ? Math.round((Date.now() - startTimeRef.current) / 1000) : 0;
+        posthog.capture("lesson_abandoned", {
+          lesson_id: lesson.id,
+          time_into_lesson_seconds: timeIntoLessonSeconds,
+          duration_seconds: timeIntoLessonSeconds,
+          last_question_index: currentStepRef.current,
+        });
+      }
+    };
+  }, [lesson.id, language.name]);
 
   // Modals / Confirmations
   const [showExitConfirm, setShowExitConfirm] = useState(false);
@@ -643,6 +756,8 @@ export default function LessonScreen() {
   useEffect(() => {
     let activeClient: StreamVideoClient | null = null;
     let activeCall: Call | null = null;
+    let activeAgentSessionId: string | null = null;
+    let activeCallId: string | null = null;
     let isMounted = true;
 
     async function initStream() {
@@ -658,7 +773,13 @@ export default function LessonScreen() {
             userName: user.fullName || user.firstName || "Learner",
             userImage: user.imageUrl || "",
             lessonId: lesson.id,
+            lessonTitle: lesson.title,
             languageId: language.id,
+            languageName: language.name,
+            goals: lesson.goals?.map((g) => g.description) || [],
+            vocabulary: lesson.vocabularyList || [],
+            phrases: lesson.phrasesList || [],
+            aiTeacherPrompt: lesson.aiTeacherPrompt || "",
           }),
         });
 
@@ -672,6 +793,7 @@ export default function LessonScreen() {
         }
 
         if (!isMounted) return;
+        activeCallId = data.callId;
 
         // 2. Setup Client
         const client = new StreamVideoClient({
@@ -695,6 +817,43 @@ export default function LessonScreen() {
         activeCall = call;
         setStreamCall(call);
         setStreamStatus("joined");
+
+        // Start closed captions automatically for this call room
+        try {
+          await call.startClosedCaptions({ language: language.id as any });
+          console.log(`Stream closed captions started successfully for language: ${language.id}`);
+        } catch (ccErr) {
+          console.warn("Failed to start closed captions automatically:", ccErr);
+        }
+
+        // 4. Start the AI Agent session
+        try {
+          setAgentStatus("connecting");
+          const agentResponse = await fetch("/api/agent/start", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              callId: data.callId,
+            }),
+          });
+          
+          if (!agentResponse.ok) {
+            throw new Error(`Failed to start agent: ${agentResponse.status}`);
+          }
+          
+          const agentData = await agentResponse.json();
+          if (agentData.session_id && isMounted) {
+            activeAgentSessionId = agentData.session_id;
+            setAgentSessionId(agentData.session_id);
+          } else if (isMounted) {
+            setAgentStatus("failed");
+          }
+        } catch (agentErr) {
+          console.error("Error starting AI Agent:", agentErr);
+          if (isMounted) {
+            setAgentStatus("failed");
+          }
+        }
       } catch (err: any) {
         console.error("Stream Video/Audio error:", err);
         if (isMounted) {
@@ -716,7 +875,18 @@ export default function LessonScreen() {
       if (activeClient) {
         activeClient.disconnectUser().catch((err) => console.log("Clean up disconnecting client:", err));
       }
+      if (activeCallId && activeAgentSessionId) {
+        fetch("/api/agent/stop", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            callId: activeCallId,
+            sessionId: activeAgentSessionId,
+          }),
+        }).catch((err) => console.log("Clean up stopping agent error:", err));
+      }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, demoMode, lesson.id, language.id]);
 
   // Handle pulse animation loop
@@ -746,10 +916,31 @@ export default function LessonScreen() {
     };
   }, [isRecording, pulseAnim]);
 
+  const stopAgentSession = async () => {
+    if (streamCall?.id && agentSessionId) {
+      try {
+        console.log(`Stopping agent session ${agentSessionId} for call ${streamCall.id}`);
+        await fetch("/api/agent/stop", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            callId: streamCall.id,
+            sessionId: agentSessionId,
+          }),
+        });
+        setAgentSessionId(null);
+        setAgentStatus("idle");
+      } catch (err) {
+        console.error("Error stopping agent session:", err);
+      }
+    }
+  };
+
   // End Call / Finish
   const handleEndCall = () => {
     if (currentStep >= steps.length - 1) {
       completeLesson(lesson.id, lesson.xpReward);
+      isCompletedRef.current = true;
       setShowSuccessModal(true);
     } else {
       setShowExitConfirm(true);
@@ -758,12 +949,14 @@ export default function LessonScreen() {
 
   const confirmExit = () => {
     setShowExitConfirm(false);
+    stopAgentSession();
     setStreamStatus("ended");
     router.replace("/learn");
   };
 
   const handleFinishAndReturn = () => {
     setShowSuccessModal(false);
+    stopAgentSession();
     setStreamStatus("ended");
     router.replace("/learn");
   };
@@ -874,6 +1067,8 @@ export default function LessonScreen() {
               setLocalMicEnabled={setLocalMicEnabled}
               callId={callId}
               user={user}
+              agentStatus={agentStatus}
+              setAgentStatus={setAgentStatus}
             />
           </StreamCall>
         </StreamVideo>
@@ -902,6 +1097,8 @@ export default function LessonScreen() {
           setLocalMicEnabled={setLocalMicEnabled}
           callId={callId}
           user={user}
+          agentStatus="connected"
+          setAgentStatus={() => {}}
         />
       )}
 
